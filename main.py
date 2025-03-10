@@ -1,4 +1,3 @@
-import numpy as np
 from arraymodel import LetArray
 from visualization import ArrayPlayer
 

@@ -3,8 +3,8 @@ from numpy import sin, cos
 from matplotlib import pyplot as plt
 from scipy.optimize import fsolve
 import warnings
-# warning_behavior = 'ignore'
-warning_behavior = 'always'
+warning_behavior = 'ignore'
+# warning_behavior = 'always'
 
 def se2(angle, x, y):
 
@@ -176,12 +176,12 @@ class LetArray():
                     negate = True
                     with warnings.catch_warnings():
                         warnings.simplefilter(warning_behavior)
-                        Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(hingedStatics, initial_guess, xtol=1e-14)
+                        Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(hingedStatics, initial_guess, xtol=1e-9)
                 elif theta > 0:
                     negate = False
                     with warnings.catch_warnings():
                         warnings.simplefilter(warning_behavior)
-                        Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(hingedStatics, initial_guess, xtol=1e-14)
+                        Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(hingedStatics, initial_guess, xtol=1e-9)
                 else:
                     theta = 0
                     Fx = -Rx
@@ -329,7 +329,9 @@ class LetArray():
 
     def calculateStaticsInverse(self, Fx, Fy, T, guess=None):
 
-        def error(M):
+        def error(parameters):
+
+            M = parameters[0]
 
             self.calculateStaticsForward(-Fx, -Fy, M)
 
@@ -346,6 +348,6 @@ class LetArray():
 
         with warnings.catch_warnings():
             warnings.simplefilter(warning_behavior)
-            M = fsolve(error, initial_guess, xtol=1e-14)
+            M = fsolve(error, initial_guess, xtol=1e-9)[0]
 
         self.calculateStaticsForward(-Fx, -Fy, M)
