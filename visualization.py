@@ -18,7 +18,8 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QStackedLayout,
     QSpacerItem,
-    QSpinBox
+    QSpinBox,
+    QAbstractSpinBox
 )
 import matplotlib
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -53,10 +54,10 @@ def roundToRes(num, res):
 
 class ArrayDeflectionVisualizer(QVBoxLayout):
 
-    def __init__(self, array: LetArray, points, *args, **kwargs):
+    def __init__(self, let_array: LetArray, points, *args, **kwargs):
         super(QVBoxLayout, self).__init__(*args, **kwargs)
 
-        self.array = array
+        self.let_array = let_array
         self.points_x, self.points_y = points
 
         # a figure instance to plot on
@@ -76,36 +77,36 @@ class ArrayDeflectionVisualizer(QVBoxLayout):
 
     def updatePlot(self):
 
-        F_length = (self.array.b + self.array.h) / 2
+        F_length = (self.let_array.b + self.let_array.h) / 2
         self.axes.clear()
         self.axes.plot(self.points_x, self.points_y, '-', color='black')
         self.axes.plot(self.points_x, self.points_y, 'o', color='black')
-        for i in range(self.array.series):
-            end_point = self.array.transforms[i, 0:2, 2]
-            R = self.array.transforms[i, 0:2, 0:2]
+        for i in range(self.let_array.series):
+            end_point = self.let_array.transforms[i, 0:2, 2]
+            R = self.let_array.transforms[i, 0:2, 0:2]
             points = np.zeros((5, 2))
-            points[0] = end_point + (R @ np.array([2 * self.array.b, self.array.h])).T
-            points[1] = end_point + (R @ np.array([0, self.array.h])).T
-            points[2] = end_point + (R @ np.array([0, -self.array.h])).T
-            points[3] = end_point + (R @ np.array([2 * self.array.b, -self.array.h])).T
-            points[4] = end_point + (R @ np.array([2 * self.array.b, self.array.h])).T
-            self.axes.plot(points[:, 0], points[:, 1], color=self.array.cmap(i % 10), alpha=0.5)
-            self.axes.fill(points[:, 0], points[:, 1], color=self.array.cmap(i % 10), alpha=0.5)
-            end_point = self.array.transforms[i + 1, 0:2, 2]
-            R = self.array.transforms[i + 1, 0:2, 0:2]
+            points[0] = end_point + (R @ np.array([2 * self.let_array.b, self.let_array.h])).T
+            points[1] = end_point + (R @ np.array([0, self.let_array.h])).T
+            points[2] = end_point + (R @ np.array([0, -self.let_array.h])).T
+            points[3] = end_point + (R @ np.array([2 * self.let_array.b, -self.let_array.h])).T
+            points[4] = end_point + (R @ np.array([2 * self.let_array.b, self.let_array.h])).T
+            self.axes.plot(points[:, 0], points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
+            self.axes.fill(points[:, 0], points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
+            end_point = self.let_array.transforms[i + 1, 0:2, 2]
+            R = self.let_array.transforms[i + 1, 0:2, 0:2]
             points = np.zeros((5, 2))
-            points[0] = end_point + (R @ np.array([0, self.array.h])).T
-            points[1] = end_point + (R @ np.array([-2 * self.array.b, self.array.h])).T
-            points[2] = end_point + (R @ np.array([-2 * self.array.b, -self.array.h])).T
-            points[3] = end_point + (R @ np.array([0, -self.array.h])).T
-            points[4] = end_point + (R @ np.array([0, self.array.h])).T
-            self.axes.plot(points[:, 0], points[:, 1], color=self.array.cmap(i % 10), alpha=0.5)
-            self.axes.fill(points[:, 0], points[:, 1], color=self.array.cmap(i % 10), alpha=0.5)
-        self.axes.plot(self.array.transforms[:, 0, 2], self.array.transforms[:, 1, 2], color=self.array.cmap(0))
-        self.axes.plot(self.array.transforms[:, 0, 2], self.array.transforms[:, 1, 2], 'o', color=self.array.cmap(0))
-        for i in range(self.array.series):
-            end_point = self.array.transforms[i, 0:2, 2]
-            F_mid = np.array([self.array.Fx_mid[i], self.array.Fy_mid[i]])
+            points[0] = end_point + (R @ np.array([0, self.let_array.h])).T
+            points[1] = end_point + (R @ np.array([-2 * self.let_array.b, self.let_array.h])).T
+            points[2] = end_point + (R @ np.array([-2 * self.let_array.b, -self.let_array.h])).T
+            points[3] = end_point + (R @ np.array([0, -self.let_array.h])).T
+            points[4] = end_point + (R @ np.array([0, self.let_array.h])).T
+            self.axes.plot(points[:, 0], points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
+            self.axes.fill(points[:, 0], points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
+        self.axes.plot(self.let_array.transforms[:, 0, 2], self.let_array.transforms[:, 1, 2], color=self.let_array.cmap(0))
+        self.axes.plot(self.let_array.transforms[:, 0, 2], self.let_array.transforms[:, 1, 2], 'o', color=self.let_array.cmap(0))
+        for i in range(self.let_array.series):
+            end_point = self.let_array.transforms[i, 0:2, 2]
+            F_mid = np.array([self.let_array.Fx_mid[i], self.let_array.Fy_mid[i]])
             F_norm = norm(F_mid)
             if F_norm != 0:
                 self.axes.arrow(end_point[0], end_point[1], F_length * F_mid[0] / F_norm, F_length * F_mid[1] / F_norm, width=F_length / 50, head_width=F_length / 20)
@@ -421,13 +422,13 @@ class ArrayPlayer:
         top_controls.addLayout(left_controls)
         top_controls.addLayout(right_controls)
 
-#         #####      #     ###### 
+#         #####      #     ######
 #        #     #    # #    #     #
 #        #     #   #   #   #     #
 #        #     #  #######  #     #
 #        #     #  #     #  #     #
 #        #     #  #     #  #     #
-#######   #####   #     #  ###### 
+#######   #####   #     #  ######
 
  #####    #####   #     #  #######  ######    #####   #         #####
 #     #  #     #  ##    #     #     #     #  #     #  #        #     #
@@ -443,11 +444,11 @@ class ArrayPlayer:
         load_controls_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         right_controls.addWidget(load_controls_label)
 
-        self.lc_list = []
-        left_lc_button_managers_list = []
-        right_lc_button_managers_list = []
-        left_lc_step_managers_list = []
-        right_lc_step_managers_list = []
+        self.load_controls_list = []
+        left_load_controls_button_managers_list = []
+        right_load_controls_button_managers_list = []
+        left_load_controls_step_managers_list = []
+        right_load_controls_step_managers_list = []
         lc_labels = [
             'Fx',
             'Fy',
@@ -479,9 +480,9 @@ class ArrayPlayer:
                 spinbox.setSingleStep(self.moment_res)
                 spinbox.setDecimals(self.moment_disp_res)
                 spinbox.setSuffix(' N-m')
-            spinbox.valueChanged.connect(self.updateLoadIK)
+            spinbox.valueChanged.connect(self.updateStatics)
             spinbox.setKeyboardTracking(False)
-            self.lc_list.append(spinbox)
+            self.load_controls_list.append(spinbox)
 
             info_display.addWidget(text)
             info_display.addWidget(spinbox)
@@ -499,8 +500,8 @@ class ArrayPlayer:
                 button_left_manager = ButtonManager(spinbox)
             else:
                 button_left_manager = ButtonManager(spinbox)
-            left_lc_button_managers_list.append(button_left_manager)
-            button_left.pressed.connect(left_lc_button_managers_list[i].decrement)
+            left_load_controls_button_managers_list.append(button_left_manager)
+            button_left.pressed.connect(left_load_controls_button_managers_list[i].decrement)
 
             button_right = QToolButton()
             button_right.setAutoRepeat(True)
@@ -512,8 +513,8 @@ class ArrayPlayer:
                 button_right_manager = ButtonManager(spinbox)
             else:
                 button_right_manager = ButtonManager(spinbox)
-            right_lc_button_managers_list.append(button_right_manager)
-            button_right.pressed.connect(right_lc_button_managers_list[i].increment)
+            right_load_controls_button_managers_list.append(button_right_manager)
+            button_right.pressed.connect(right_load_controls_button_managers_list[i].increment)
 
             # step buttons
 
@@ -525,8 +526,8 @@ class ArrayPlayer:
                 step_left_manager = ButtonManager(spinbox)
             else:
                 step_left_manager = ButtonManager(spinbox)
-            left_lc_step_managers_list.append(step_left_manager)
-            step_left.pressed.connect(left_lc_step_managers_list[i].decrement)
+            left_load_controls_step_managers_list.append(step_left_manager)
+            step_left.pressed.connect(left_load_controls_step_managers_list[i].decrement)
 
             # right step
             step_right = QToolButton()
@@ -536,8 +537,8 @@ class ArrayPlayer:
                 step_right_manager = ButtonManager(spinbox)
             else:
                 step_right_manager = ButtonManager(spinbox)
-            right_lc_step_managers_list.append(step_right_manager)
-            step_right.pressed.connect(right_lc_step_managers_list[i].increment)
+            right_load_controls_step_managers_list.append(step_right_manager)
+            step_right.pressed.connect(right_load_controls_step_managers_list[i].increment)
 
             # add buttons to button layout
             buttons.addWidget(step_left)
@@ -571,29 +572,26 @@ class ArrayPlayer:
         right_controls.addItem(QSpacerItem(1, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum))
         right_controls.addWidget(position_controls_label)
 
-        self.pc_list = []
-        left_pc_button_managers_list = []
-        right_pc_button_managers_list = []
-        left_pc_step_managers_list = []
-        right_pc_step_managers_list = []
-        pc_labels = [
+        self.position_controls_list = []
+        position_controls_labels = [
             'X',
             'Y',
             'Theta'
         ]
-        for i in range(len(pc_labels)):
+        for i in range(len(position_controls_labels)):
 
             # info display
             info_display = QHBoxLayout()
 
             # text
             text = QLabel()
-            text.setText(pc_labels[i])
+            text.setText(position_controls_labels[i])
             text.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Maximum)
             text.setFixedWidth(40)
 
             # spinbox
             spinbox = CustomDoubleSpinBox()
+            spinbox.setReadOnly(True)
             if i < 2:
                 spinbox.setMaximum(1000000 * self.trans_res)
                 spinbox.setMinimum(-1000000 * self.trans_res)
@@ -607,90 +605,30 @@ class ArrayPlayer:
                 spinbox.setSingleStep(self.ang_res)
                 spinbox.setDecimals(self.ang_disp_res)
                 spinbox.setSuffix(' deg')
-            spinbox.valueChanged.connect(self.updatePositionIK)
             spinbox.setKeyboardTracking(False)
-            self.pc_list.append(spinbox)
+            self.position_controls_list.append(spinbox)
 
             info_display.addWidget(text)
             info_display.addWidget(spinbox)
 
-            # buttons
-            buttons = QHBoxLayout()
-
-            button_left = QToolButton()
-            button_left.setAutoRepeat(True)
-            button_left.setAutoRepeatInterval(autoRepeatInterval)
-            button_left.setAutoRepeatDelay(autoRepeatInterval)
-            button_left.setArrowType(Qt.ArrowType.LeftArrow)
-            button_left.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-            if i < 2:
-                button_left_manager = ButtonManager(spinbox)
-            else:
-                button_left_manager = ButtonManager(spinbox, True)
-            left_pc_button_managers_list.append(button_left_manager)
-            button_left.pressed.connect(left_pc_button_managers_list[i].decrement)
-
-            button_right = QToolButton()
-            button_right.setAutoRepeat(True)
-            button_right.setAutoRepeatInterval(autoRepeatInterval)
-            button_right.setAutoRepeatDelay(autoRepeatInterval)
-            button_right.setArrowType(Qt.ArrowType.RightArrow)
-            button_right.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-            if i < 2:
-                button_right_manager = ButtonManager(spinbox)
-            else:
-                button_right_manager = ButtonManager(spinbox, True)
-            right_pc_button_managers_list.append(button_right_manager)
-            button_right.pressed.connect(right_pc_button_managers_list[i].increment)
-
-            # step buttons
-
-            # left step
-            step_left = QToolButton()
-            step_left.setText('-')
-            step_left.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-            if i < 2:
-                step_left_manager = ButtonManager(spinbox)
-            else:
-                step_left_manager = ButtonManager(spinbox, True)
-            left_pc_step_managers_list.append(step_left_manager)
-            step_left.pressed.connect(left_pc_step_managers_list[i].decrement)
-
-            # right step
-            step_right = QToolButton()
-            step_right.setText('+')
-            step_right.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-            if i < 2:
-                step_right_manager = ButtonManager(spinbox)
-            else:
-                step_right_manager = ButtonManager(spinbox, True)
-            right_pc_step_managers_list.append(step_right_manager)
-            step_right.pressed.connect(right_pc_step_managers_list[i].increment)
-
-            # add buttons to button layout
-            buttons.addWidget(step_left)
-            buttons.addWidget(button_left)
-            buttons.addWidget(button_right)
-            buttons.addWidget(step_right)
-            # add button layout to right_controls
+            # add info display layout to right_controls
             right_controls.addLayout(info_display)
-            right_controls.addLayout(buttons)
 
-#     #  #######  ######            #         #####      #     ######   
-##   ##     #     #     #           #        #     #    # #    #     #  
-# # # #     #     #     #           #        #     #   #   #   #     #  
-#  #  #     #     #     #           #        #     #  #######  #     #  
-#     #     #     #     #           #        #     #  #     #  #     #  
-#     #     #     #     #           #        #     #  #     #  #     #  
-#     #  #######  ######            #######   #####   #     #  ######   
+#     #  #######  ######            #         #####      #     ######
+##   ##     #     #     #           #        #     #    # #    #     #
+# # # #     #     #     #           #        #     #   #   #   #     #
+#  #  #     #     #     #           #        #     #  #######  #     #
+#     #     #     #     #           #        #     #  #     #  #     #
+#     #     #     #     #           #        #     #  #     #  #     #
+#     #  #######  ######            #######   #####   #     #  ######
 
- #####    #####   #     #  #######  ######    #####   #         #####   
-#     #  #     #  ##    #     #     #     #  #     #  #        #     #  
-#        #     #  # #   #     #     #     #  #     #  #        #        
-#        #     #  #  #  #     #     ######   #     #  #         #####   
-#        #     #  #   # #     #     #   #    #     #  #              #  
-#     #  #     #  #    ##     #     #    #   #     #  #        #     #  
- #####    #####   #     #     #     #     #   #####   #######   #####   
+ #####    #####   #     #  #######  ######    #####   #         #####
+#     #  #     #  ##    #     #     #     #  #     #  #        #     #
+#        #     #  # #   #     #     #     #  #     #  #        #
+#        #     #  #  #  #     #     ######   #     #  #         #####
+#        #     #  #   # #     #     #   #    #     #  #              #
+#     #  #     #  #    ##     #     #    #   #     #  #        #     #
+ #####    #####   #     #     #     #     #   #####   #######   #####
 
         # CONFIGURE MID-LOAD CONTROLS
         mid_load_controls_label = QLabel()
@@ -1146,7 +1084,7 @@ class ArrayPlayer:
         main_layout.addLayout(controls, stretch=1)
 
         self.updateDataFields()
-        self.updateLoadIK()
+        self.updateStatics()
 
         # WRAPPING UP
         w = QWidget()
@@ -1197,7 +1135,7 @@ class ArrayPlayer:
         self.array.Fy_mid[junction_index] = self.mlc_list[1].value()
         self.array.T_mid[junction_index] = self.mlc_list[2].value()
 
-        self.updateLoadIK()
+        self.updateStatics()
 
     def updateDataFields(self):
 
@@ -1235,61 +1173,30 @@ class ArrayPlayer:
         self.von_mises_value.setText(str(int(np.rint(max_von_mises))))
         self.von_mises_safety_factor.setText(von_mises_safety_factor)
 
-    def updateLoadIK(self):
+    def updateStatics(self):
 
         Rx, Ry, M = self.array.getReactions()
 
-        Fx = self.lc_list[0].value()
-        Fy = self.lc_list[1].value()
-        T = self.lc_list[2].value()
+        Fx = self.load_controls_list[0].value()
+        Fy = self.load_controls_list[1].value()
+        T = self.load_controls_list[2].value()
 
-        self.array.inverseKinematicsLoad(Fx, Fy, T, guess=M)
+        self.array.calculateStaticsInverse(Fx, Fy, T, guess=M)
 
         x, y = self.array.getEndPosition()
         theta = self.array.getEndRotation()
 
-        self.pc_list[0].blockSignals(True)
-        self.pc_list[0].setValue(x)
-        self.pc_list[0].blockSignals(False)
+        self.position_controls_list[0].blockSignals(True)
+        self.position_controls_list[0].setValue(x)
+        self.position_controls_list[0].blockSignals(False)
 
-        self.pc_list[1].blockSignals(True)
-        self.pc_list[1].setValue(y)
-        self.pc_list[1].blockSignals(False)
+        self.position_controls_list[1].blockSignals(True)
+        self.position_controls_list[1].setValue(y)
+        self.position_controls_list[1].blockSignals(False)
 
-        self.pc_list[2].blockSignals(True)
-        self.pc_list[2].setValue(np.degrees(theta))
-        self.pc_list[2].blockSignals(False)
-
-        current_visualization = self.graphics.currentIndex()
-        if current_visualization == 0:
-            self.array_visualizer.updatePlot()
-        elif current_visualization == 1:
-            self.torsion_bar_visualizer.updatePlot()
-        self.updateDataFields()
-
-    def updatePositionIK(self):
-
-        Rx, Ry, M = self.array.getReactions()
-
-        x = self.pc_list[0].value()
-        y = self.pc_list[1].value()
-        theta = self.pc_list[2].value()
-
-        self.array.inverseKinematicsPosition(x, y, theta, guess=[Rx, Ry, M])
-
-        Fx, Fy, T = self.array.getEndLoad()
-
-        self.lc_list[0].blockSignals(True)
-        self.lc_list[0].setValue(Fx)
-        self.lc_list[0].blockSignals(False)
-
-        self.lc_list[1].blockSignals(True)
-        self.lc_list[1].setValue(Fy)
-        self.lc_list[1].blockSignals(False)
-
-        self.lc_list[2].blockSignals(True)
-        self.lc_list[2].setValue(T)
-        self.lc_list[2].blockSignals(False)
+        self.position_controls_list[2].blockSignals(True)
+        self.position_controls_list[2].setValue(np.degrees(theta))
+        self.position_controls_list[2].blockSignals(False)
 
         current_visualization = self.graphics.currentIndex()
         if current_visualization == 0:
@@ -1322,7 +1229,7 @@ class ArrayPlayer:
         resets all deflections to zero
         '''
 
-        for i, spinbox in enumerate(self.lc_list):
+        for i, spinbox in enumerate(self.load_controls_list):
             spinbox.blockSignals(True)
             spinbox.setValue(0)
             spinbox.blockSignals(False)
@@ -1335,19 +1242,19 @@ class ArrayPlayer:
             spinbox.setValue(0)
             spinbox.blockSignals(False)
 
-        self.lc_list[0].setSingleStep(self.force_res)
-        self.lc_list[0].setDecimals(getDecimals(self.force_res))
-        self.lc_list[1].setSingleStep(self.force_res)
-        self.lc_list[1].setDecimals(getDecimals(self.force_res))
-        self.lc_list[2].setSingleStep(self.moment_res)
-        self.lc_list[2].setDecimals(getDecimals(self.moment_res))
+        self.load_controls_list[0].setSingleStep(self.force_res)
+        self.load_controls_list[0].setDecimals(getDecimals(self.force_res))
+        self.load_controls_list[1].setSingleStep(self.force_res)
+        self.load_controls_list[1].setDecimals(getDecimals(self.force_res))
+        self.load_controls_list[2].setSingleStep(self.moment_res)
+        self.load_controls_list[2].setDecimals(getDecimals(self.moment_res))
 
-        self.pc_list[0].setSingleStep(self.trans_res)
-        self.pc_list[0].setDecimals(getDecimals(self.trans_res))
-        self.pc_list[1].setSingleStep(self.trans_res)
-        self.pc_list[1].setDecimals(getDecimals(self.trans_res))
-        self.pc_list[2].setSingleStep(self.ang_res)
-        self.pc_list[2].setDecimals(getDecimals(self.ang_res))
+        self.position_controls_list[0].setSingleStep(self.trans_res)
+        self.position_controls_list[0].setDecimals(getDecimals(self.trans_res))
+        self.position_controls_list[1].setSingleStep(self.trans_res)
+        self.position_controls_list[1].setDecimals(getDecimals(self.trans_res))
+        self.position_controls_list[2].setSingleStep(self.ang_res)
+        self.position_controls_list[2].setDecimals(getDecimals(self.ang_res))
 
         self.mlc_list[0].setSingleStep(self.force_res)
         self.mlc_list[0].setDecimals(getDecimals(self.force_res))
@@ -1356,7 +1263,7 @@ class ArrayPlayer:
         self.mlc_list[2].setSingleStep(self.moment_res)
         self.mlc_list[2].setDecimals(getDecimals(self.moment_res))
 
-        self.updateLoadIK()
+        self.updateStatics()
 
     def addProfilePoint(self):
 

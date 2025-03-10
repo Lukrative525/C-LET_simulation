@@ -3,8 +3,8 @@ from numpy import sin, cos
 from matplotlib import pyplot as plt
 from scipy.optimize import fsolve
 import warnings
-warning_behavior = 'ignore'
-# warning_behavior = 'always'
+# warning_behavior = 'ignore'
+warning_behavior = 'always'
 
 def se2(angle, x, y):
 
@@ -43,7 +43,7 @@ class LetArray():
         self.Ix = (2 * self.b) * (2 * self.h) ** 3 / 12
         self.Iy = (2 * self.h) * (2 * self.b) ** 3 / 12
 
-        self.T = transformConstructor(b)
+        self.T = transformConstructor(self.b)
         self.calculateTorsionSpringConstant()
         self.calculateBendingSpringConstant()
 
@@ -57,7 +57,7 @@ class LetArray():
         self.Fy_mid = np.zeros(self.series + 1)
         self.T_mid = np.zeros(self.series + 1)
         self.calculateTransforms()
-        self.calculateStatics(0, 0, 0)
+        self.calculateStaticsForward(0, 0, 0)
 
         self.cmap = plt.get_cmap("tab10")
 
@@ -117,16 +117,11 @@ class LetArray():
         for i in range(self.series):
             self.transforms[i + 1] = self.transforms[i] @ self.T(self.thetas[i], self.extensions[i])
 
-    def calculateStatics(self, Rx, Ry, M):
+    def calculateStaticsForward(self, Rx, Ry, M):
 
         self.Rx[0] = Rx - np.sum(self.Fx_mid)
         self.Ry[0] = Ry - np.sum(self.Fy_mid)
         self.M[0] = M - np.sum(self.T_mid)
-
-        b = self.b
-        h = self.h
-        kb = self.bending_constant
-        kt = self.torsion_constant
 
         for i in range(self.series):
 
@@ -140,16 +135,16 @@ class LetArray():
 
             # =====================================================================================
 
-            Ms = Ry * b - M
-            theta = kt * Ms
+            Ms = Ry * self.b - M
+            theta = self.torsion_constant * Ms
             Fsx = -Rx
             Fsy = -Ry
-            delta = kb * (Fsx * cos(theta) + Fsy * sin(theta))
+            delta = self.bending_constant * (Fsx * cos(theta) + Fsy * sin(theta))
             Fx = -Rx
             Fy = -Ry
-            T = Fx * b * sin(2 * theta) - Fy * b * cos(2 * theta) + Ms
+            T = Fx * self.b * sin(2 * theta) - Fy * self.b * cos(2 * theta) + Ms
 
-            if delta < np.abs(2 * h * sin(theta)):
+            if delta < np.abs(2 * self.h * sin(theta)):
 
                 def hingedStatics(X):
 
@@ -158,18 +153,18 @@ class LetArray():
                     test = np.zeros(10)
 
                     if negate:
-                        test[0] = delta - 2 * h * sin(-theta)
+                        test[0] = delta - 2 * self.h * sin(-theta)
                     else:
-                        test[0] = delta - 2 * h * sin(theta)
+                        test[0] = delta - 2 * self.h * sin(theta)
                     test[1] = Rx + Fx
                     test[2] = Ry + Fy
-                    test[3] = M + T + Rx * (delta * sin(theta) + b * sin(2 * theta)) - Ry * (b + delta * cos(theta) + b * cos(2 * theta))
+                    test[3] = M + T + Rx * (delta * sin(theta) + self.b * sin(2 * theta)) - Ry * (self.b + delta * cos(theta) + self.b * cos(2 * theta))
                     test[4] = Rx + Fsx + Px
                     test[5] = Ry + Fsy + Py
-                    test[6] = M + Ms - Ry * b - Px * h
-                    test[7] = T - Ms + Fy * b * cos(2 * theta) - Fx * b * sin(2 * theta) + Py * h * sin(2 * theta) + Px * h * cos(2 * theta)
-                    test[8] = delta - kb * (Fsx * cos(theta) + Fsy * sin(theta))
-                    test[9] = theta - kt * Ms
+                    test[6] = M + Ms - Ry * self.b - Px * self.h
+                    test[7] = T - Ms + Fy * self.b * cos(2 * theta) - Fx * self.b * sin(2 * theta) + Py * self.h * sin(2 * theta) + Px * self.h * cos(2 * theta)
+                    test[8] = delta - self.bending_constant * (Fsx * cos(theta) + Fsy * sin(theta))
+                    test[9] = theta - self.torsion_constant * Ms
 
                     return(test)
 
@@ -191,7 +186,7 @@ class LetArray():
                     theta = 0
                     Fx = -Rx
                     Fy = -Ry
-                    T = 2 * b * Ry - M
+                    T = 2 * self.b * Ry - M
                     delta = 0
                     theta = 0
 
@@ -332,11 +327,11 @@ class LetArray():
 
         return(reactions)
 
-    def inverseKinematicsLoad(self, Fx, Fy, T, guess=None):
+    def calculateStaticsInverse(self, Fx, Fy, T, guess=None):
 
         def error(M):
 
-            self.calculateStatics(-Fx, -Fy, M)
+            self.calculateStaticsForward(-Fx, -Fy, M)
 
             end_load = self.getEndLoad()
 
@@ -353,72 +348,4 @@ class LetArray():
             warnings.simplefilter(warning_behavior)
             M = fsolve(error, initial_guess, xtol=1e-14)
 
-        self.calculateStatics(-Fx, -Fy, M)
-
-    def inverseKinematicsPosition(self, x, y, theta=None, guess=None):
-
-        def error(inputs):
-
-            Rx, Ry, M = inputs
-
-            self.calculateStatics(Rx, Ry, M)
-
-            end_position = self.getEndPosition()
-            end_rotation = self.getEndRotation()
-
-            error = np.zeros(3)
-
-            # error in x
-            error[0] = (x - end_position[0]) / (np.average(2 * self.b + 2 * self.h))
-
-            # error in y
-            error[1] = (y - end_position[1]) / (np.average(2 * self.b + 2 * self.h))
-
-            # error in theta
-            if theta is not None:
-                error[2] = (theta - end_rotation) / np.pi
-            else:
-                error[2] = 0
-
-            return(error)
-
-        if guess is not None and len(guess) == 3:
-            initial_guess = np.array(guess)
-        else:
-            initial_guess = np.zeros(3)
-
-        with warnings.catch_warnings():
-            warnings.simplefilter(warning_behavior)
-            Rx, Ry, M = fsolve(error, initial_guess, xtol=1e-14)
-
-        self.calculateStatics(Rx, Ry, M)
-
-    def plotArray(self):
-
-        fig = plt.figure()
-        axes = fig.add_subplot()
-        for i in range(self.series):
-            end_point = self.transforms[i, 0:2, 2]
-            R = self.transforms[i, 0:2, 0:2]
-            points = np.zeros((5, 2))
-            points[0] = end_point + (R @ np.array([2 * self.b, self.h])).T
-            points[1] = end_point + (R @ np.array([0, self.h])).T
-            points[2] = end_point + (R @ np.array([0, -self.h])).T
-            points[3] = end_point + (R @ np.array([2 * self.b, -self.h])).T
-            points[4] = end_point + (R @ np.array([2 * self.b, self.h])).T
-            axes.plot(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
-            axes.fill(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
-            end_point = self.transforms[i + 1, 0:2, 2]
-            R = self.transforms[i + 1, 0:2, 0:2]
-            points = np.zeros((5, 2))
-            points[0] = end_point + (R @ np.array([0, self.h])).T
-            points[1] = end_point + (R @ np.array([-2 * self.b, self.h])).T
-            points[2] = end_point + (R @ np.array([-2 * self.b, -self.h])).T
-            points[3] = end_point + (R @ np.array([0, -self.h])).T
-            points[4] = end_point + (R @ np.array([0, self.h])).T
-            axes.plot(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
-            axes.fill(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
-        axes.plot(self.transforms[:, 0, 2], self.transforms[:, 1, 2], color=self.cmap(0))
-        axes.plot(self.transforms[:, 0, 2], self.transforms[:, 1, 2], 'o', color=self.cmap(0))
-        axes.set_aspect(1)
-        plt.show()
+        self.calculateStaticsForward(-Fx, -Fy, M)
