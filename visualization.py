@@ -29,28 +29,30 @@ from matplotlib import pyplot as plt
 import warnings
 from arraymodel import LetArray
 
-def getDecimals(num):
+def getDecimals(number):
 
         '''
-        returns the number of decimals places in the input num
+        returns the number of decimals places in the input number
         '''
 
-        num_string = np.format_float_positional(num)
-        decimal_index = (len(num_string) - 1)
-        for i in range(len(num_string)):
-            if num_string[i] == '.':
+        number_string = np.format_float_positional(number)
+        decimal_index = (len(number_string) - 1)
+        for i in range(len(number_string)):
+            if number_string[i] == '.':
                 decimal_index = i
-        decimals = (len(num_string) - 1) - decimal_index
+        decimals = (len(number_string) - 1) - decimal_index
 
-        return(decimals)
+        return decimals
 
-def roundToRes(num, res):
+def roundToResolution(num, resolution):
 
         '''
         rounds the input num to the resolution res
         '''
 
-        return(res * round(num / res))
+        rounded_to_resolution = resolution * round(num / resolution)
+
+        return rounded_to_resolution
 
 class ArrayDeflectionVisualizer(QVBoxLayout):
 
@@ -219,7 +221,7 @@ class TorsionBarStressVisualizer(QVBoxLayout):
         x, y, z = self.deflectionTorsion(x, y, z, index)
         x, y, z = self.deflectionBending(x, y, z, index)
 
-        return(x, y, z)
+        return x, y, z
 
     def deflectionTorsion(self, x, y, z, index):
 
@@ -233,7 +235,7 @@ class TorsionBarStressVisualizer(QVBoxLayout):
         x_deflected = x * np.cos(gamma_z) - y * np.sin(gamma_z)
         y_deflected = x * np.sin(gamma_z) + y * np.cos(gamma_z)
 
-        return(x_deflected, y_deflected, z)
+        return x_deflected, y_deflected, z
 
     def deflectionBending(self, x, y, z, index):
 
@@ -250,7 +252,7 @@ class TorsionBarStressVisualizer(QVBoxLayout):
             x_deflected = x + deflection_z * np.cos(theta)
             y_deflected = y + deflection_z * np.sin(theta)
 
-        return(x_deflected, y_deflected, z)
+        return x_deflected, y_deflected, z
 
     def updatePlot(self):
 
@@ -357,7 +359,7 @@ class TorsionBarStressVisualizer(QVBoxLayout):
 
         face_values = convolve2d(input_data, np.ones((2, 2)) / 4)[1:-1, 1:-1]
 
-        return(face_values)
+        return face_values
 
 class ArrayPlayer:
 
@@ -1352,12 +1354,12 @@ class ButtonManager:
 
     def decrement(self):
         inc = self.widget.singleStep()
-        new_value = roundToRes(self.widget.value() - inc, inc)
+        new_value = roundToResolution(self.widget.value() - inc, inc)
         self.widget.setValue(new_value)
 
     def increment(self):
         inc = self.widget.singleStep()
-        new_value = roundToRes(self.widget.value() + inc, inc)
+        new_value = roundToResolution(self.widget.value() + inc, inc)
         self.widget.setValue(new_value)
 
 class CustomDoubleSpinBox(QDoubleSpinBox):

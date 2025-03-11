@@ -14,7 +14,7 @@ def se2(angle, x, y):
         [          0,           0, 1]
     ])
 
-    return(transformation_matrix)
+    return transformation_matrix
 
 def transformConstructor(b):
 
@@ -24,9 +24,11 @@ def transformConstructor(b):
 
         transformation_matrix_2 = se2(theta, extension + 2 * b * cos(theta), 0)
 
-        return(transformation_matrix_1 @ transformation_matrix_2)
+        total_transformation_matrix = transformation_matrix_1 @ transformation_matrix_2
 
-    return(T)
+        return total_transformation_matrix
+
+    return T
 
 class LetArray():
 
@@ -93,14 +95,13 @@ class LetArray():
         else:
             short_side, long_side = self.b, self.h
 
-        coef_l = (192 / np.pi ** 5) * (short_side / long_side)
-        coef_r = 0
-        with warnings.catch_warnings(action='ignore'):
-            for n in range(1, 2 * n + 1, 2):
-                add_on = np.nan_to_num((1 / n ** 5) * np.tanh(n * np.pi * long_side / (2 * short_side)))
-                coef_r += add_on * np.logical_not(np.isinf(add_on))
+        left_factor = (192 / np.pi ** 5) * (short_side / long_side)
+        right_factor = 0
+        for n in range(1, 2 * n + 1, 2):
+            summand = np.nan_to_num((1 / n ** 5) * np.tanh(n * np.pi * long_side / (2 * short_side)))
+            right_factor += summand * np.logical_not(np.isinf(summand))
 
-        k1 = (1 - coef_l * coef_r) / 3
+        k1 = (1 - left_factor * right_factor) / 3
 
         self.torsion_constant = self.L / (2 * self.G * k1 * (2 * long_side) * (2 * short_side) ** 3)
 
@@ -144,18 +145,15 @@ class LetArray():
             Fy = -Ry
             T = Fx * self.b * sin(2 * theta) - Fy * self.b * cos(2 * theta) + Ms
 
-            if delta < np.abs(2 * self.h * sin(theta)):
+            if delta < 2 * self.h * sin(abs(theta)):
 
-                def hingedStatics(X):
+                def interferenceStatics(X):
 
                     Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = X
 
                     test = np.zeros(10)
 
-                    if negate:
-                        test[0] = delta - 2 * self.h * sin(-theta)
-                    else:
-                        test[0] = delta - 2 * self.h * sin(theta)
+                    test[0] = delta - 2 * self.h * sin(abs(theta))
                     test[1] = Rx + Fx
                     test[2] = Ry + Fy
                     test[3] = M + T + Rx * (delta * sin(theta) + self.b * sin(2 * theta)) - Ry * (self.b + delta * cos(theta) + self.b * cos(2 * theta))
@@ -166,29 +164,21 @@ class LetArray():
                     test[8] = delta - self.bending_constant * (Fsx * cos(theta) + Fsy * sin(theta))
                     test[9] = theta - self.torsion_constant * Ms
 
-                    return(test)
+                    return test
 
                 Px = 0
                 Py = 0
                 initial_guess = [Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta]
 
-                if theta < 0:
-                    negate = True
-                    with warnings.catch_warnings():
-                        warnings.simplefilter(warning_behavior)
-                        Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(hingedStatics, initial_guess, xtol=1e-9)
-                elif theta > 0:
-                    negate = False
-                    with warnings.catch_warnings():
-                        warnings.simplefilter(warning_behavior)
-                        Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(hingedStatics, initial_guess, xtol=1e-9)
-                else:
-                    theta = 0
+                if theta == 0:
                     Fx = -Rx
                     Fy = -Ry
                     T = 2 * self.b * Ry - M
                     delta = 0
-                    theta = 0
+                else:
+                    with warnings.catch_warnings():
+                        warnings.simplefilter(warning_behavior)
+                        Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(interferenceStatics, initial_guess, xtol=1e-9)
 
             # =====================================================================================
 
@@ -206,32 +196,34 @@ class LetArray():
     def sigmaZX(self, x, y, index, n=10):
 
         gamma = self.gammas[index]
-        coef_l = -16 * self.G * gamma * self.b / (self.L * np.pi ** 2)
+        left_factor = -16 * self.G * gamma * self.b / (self.L * np.pi ** 2)
         if hasattr(x, 'shape'):
-            coef_r = np.zeros(x.shape)
+            right_factor = np.zeros(x.shape)
         else:
-            coef_r = 0
-        with warnings.catch_warnings(action='ignore'):
-            for i in range(1, 2 * n + 1, 2):
-                add_on = np.nan_to_num((-1) ** ((i - 1) / 2) * np.cos(i * np.pi * x / (2 * self.b)) * np.sinh(i * np.pi * y / (2 * self.b)) / (i ** 2 * np.cosh(i * np.pi * self.h / (2 * self.b))))
-                coef_r += add_on * np.logical_not(np.isinf(add_on))
+            right_factor = 0
+        for i in range(1, 2 * n + 1, 2):
+            summand = np.nan_to_num((-1) ** ((i - 1) / 2) * np.cos(i * np.pi * x / (2 * self.b)) * np.sinh(i * np.pi * y / (2 * self.b)) / (i ** 2 * np.cosh(i * np.pi * self.h / (2 * self.b))))
+            right_factor += summand * np.logical_not(np.isinf(summand))
 
-        return(coef_l * coef_r)
+        sigma_zx = left_factor * right_factor
+
+        return sigma_zx
 
     def sigmaZY(self, x, y, index, n=10):
 
         gamma = self.gammas[index]
-        coef_l = -16 * self.G * gamma * self.b / (self.L * np.pi ** 2)
+        left_factor = -16 * self.G * gamma * self.b / (self.L * np.pi ** 2)
         if hasattr(x, 'shape'):
-            coef_r = np.zeros(x.shape)
+            right_factor = np.zeros(x.shape)
         else:
-            coef_r = 0
-        with warnings.catch_warnings(action='ignore'):
-            for i in range(1, 2 * n + 1, 2):
-                add_on = np.nan_to_num((-1) ** ((i - 1) / 2) * np.sin(i * np.pi * x / (2 * self.b)) * np.cosh(i * np.pi * y / (2 * self.b)) / (i ** 2 * np.cosh(i * np.pi * self.h / (2 * self.b))))
-                coef_r += add_on * np.logical_not(np.isinf(add_on))
+            right_factor = 0
+        for i in range(1, 2 * n + 1, 2):
+            summand = np.nan_to_num((-1) ** ((i - 1) / 2) * np.sin(i * np.pi * x / (2 * self.b)) * np.cosh(i * np.pi * y / (2 * self.b)) / (i ** 2 * np.cosh(i * np.pi * self.h / (2 * self.b))))
+            right_factor += summand * np.logical_not(np.isinf(summand))
 
-        return(2 * self.G * gamma * x / self.L + coef_l * coef_r)
+        sigma_zy = (2 * self.G * gamma * x / self.L) + (left_factor * right_factor)
+
+        return sigma_zy
 
     def sigmaZZ(self, x, z, index):
 
@@ -241,7 +233,7 @@ class LetArray():
         else:
             bending_stress = (12 * deflection_max * self.E * x / self.L ** 3) * (self.L / 2 - z)
 
-        return(bending_stress)
+        return bending_stress
 
     def vonMisesStress3D(self, sigma_1, sigma_2, sigma_3, sigma_12, sigma_13, sigma_23):
 
@@ -249,9 +241,9 @@ class LetArray():
         Returns the von Mises stress of an arbitrary stress element.
         '''
 
-        sigma_prime = np.sqrt(((sigma_1 - sigma_2) ** 2 + (sigma_1 - sigma_3) ** 2 + (sigma_2 - sigma_3) ** 2) / 2 + 3 * (sigma_12 ** 2 + sigma_13 ** 2 + sigma_23 ** 2))
+        von_mises_stress = np.sqrt(((sigma_1 - sigma_2) ** 2 + (sigma_1 - sigma_3) ** 2 + (sigma_2 - sigma_3) ** 2) / 2 + 3 * (sigma_12 ** 2 + sigma_13 ** 2 + sigma_23 ** 2))
 
-        return(sigma_prime)
+        return von_mises_stress
 
     def getMaxBending(self):
 
@@ -262,7 +254,7 @@ class LetArray():
         index_max = np.argmax(bending_stresses)
         max_bending = bending_stresses[index_max]
 
-        return(index_max, max_bending)
+        return index_max, max_bending
 
     def getMaxTorsion(self):
 
@@ -273,7 +265,7 @@ class LetArray():
         index_max = np.argmax(torsion_stresses)
         max_torsion = torsion_stresses[index_max]
 
-        return(index_max, max_torsion)
+        return index_max, max_torsion
 
     def getMaxVonMises(self):
 
@@ -296,15 +288,15 @@ class LetArray():
         index_max = np.argmax(von_mises_maxes)
         max_von_mises = von_mises_maxes[index_max]
 
-        return(index_max, max_von_mises)
+        return index_max, max_von_mises
 
     def getEndPosition(self):
 
-        return(self.transforms[-1][:2, 2])
+        return self.transforms[-1][:2, 2]
 
     def getEndRotation(self):
 
-        return(np.sum(self.gammas))
+        return np.sum(self.gammas)
 
     def getEndLoad(self):
 
@@ -315,7 +307,7 @@ class LetArray():
 
         load = np.array([end_force[0], end_force[1], end_torque])
 
-        return(load)
+        return load
 
     def getReactions(self):
 
@@ -325,7 +317,7 @@ class LetArray():
 
         reactions = np.array([Rx, Ry, M])
 
-        return(reactions)
+        return reactions
 
     def calculateStaticsInverse(self, Fx, Fy, T, guess=None):
 
@@ -339,7 +331,7 @@ class LetArray():
 
             error = T - end_load[2]
 
-            return(error)
+            return error
 
         if guess is not None:
             initial_guess = guess

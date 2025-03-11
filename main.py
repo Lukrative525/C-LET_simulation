@@ -6,7 +6,7 @@ def msiToPa(msi):
     psi = msi * 1e6
     Pa = psi * 6894.757
 
-    return(Pa)
+    return Pa
 
 if __name__ == "__main__":
 
