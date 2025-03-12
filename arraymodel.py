@@ -159,8 +159,8 @@ class LetArray():
                     test[3] = M + T + Rx * (delta * sin(theta) + self.b * sin(2 * theta)) - Ry * (self.b + delta * cos(theta) + self.b * cos(2 * theta))
                     test[4] = Rx + Fsx + Px
                     test[5] = Ry + Fsy + Py
-                    test[6] = M + Ms - Ry * self.b - Px * self.h
-                    test[7] = T - Ms + Fy * self.b * cos(2 * theta) - Fx * self.b * sin(2 * theta) + Py * self.h * sin(2 * theta) + Px * self.h * cos(2 * theta)
+                    test[6] = M + Ms - Ry * self.b - Px * self.h * np.sign(theta)
+                    test[7] = T - Ms + Fy * self.b * cos(2 * theta) - Fx * self.b * sin(2 * theta) + ((Py * self.h * sin(2 * theta)) + (Px * self.h * cos(2 * theta))) * np.sign(theta)
                     test[8] = delta - self.bending_constant * (Fsx * cos(theta) + Fsy * sin(theta))
                     test[9] = theta - self.torsion_constant * Ms
 
