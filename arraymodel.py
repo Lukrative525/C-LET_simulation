@@ -180,6 +180,13 @@ class LetArray():
                         warnings.simplefilter(warning_behavior)
                         Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(interferenceStatics, initial_guess, xtol=1e-9)
 
+                if delta <= 0:
+                    Fx = -Rx
+                    Fy = -Ry
+                    T = 2 * self.b * Ry - M
+                    delta = 0
+                    theta = 0
+
             # =====================================================================================
 
             F = np.array([Fx, Fy])
