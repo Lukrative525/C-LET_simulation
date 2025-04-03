@@ -1,12 +1,5 @@
-from arraymodel import LetArray
-from visualization import ArrayPlayer
-
-def msiToPa(msi):
-
-    psi = msi * 1e6
-    Pa = psi * 6894.757
-
-    return Pa
+from simulation.arraymodel import LetArray, msiToPa
+from simulation.visualization import ArrayPlayer
 
 if __name__ == "__main__":
 
@@ -23,8 +16,6 @@ if __name__ == "__main__":
     torsion_bar_thickness = 0.018 * 25.4e-3
     h = torsion_bar_width / 2
     b = torsion_bar_thickness / 2
-
-    print(L)
 
     array = LetArray(b, h, L, E, G, Sy, num_series)
 

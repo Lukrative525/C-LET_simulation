@@ -6,6 +6,13 @@ import warnings
 warning_behavior = 'ignore'
 # warning_behavior = 'always'
 
+def msiToPa(msi):
+
+    psi = msi * 1e6
+    Pa = psi * 6894.757
+
+    return Pa
+
 def se2(angle, x, y):
 
     transformation_matrix = np.array([
