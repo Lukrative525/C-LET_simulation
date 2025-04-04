@@ -394,13 +394,13 @@ class LetArray():
                 axes.arrow(end_point[0], end_point[1], F_length * F_mid[0] / F_norm, F_length * F_mid[1] / F_norm, width=F_length / 50, head_width=F_length / 20)
         axes.set_aspect(1)
 
-    def graduallyReposition(self, Rx, Ry, M, steps):
+    def graduallyReposition(self, Fx, Fy, T, steps):
 
         steps = max(steps, 2)
 
-        increments_Rx = linspace(0, Rx, steps)
-        increments_Ry = linspace(0, Ry, steps)
-        increments_M = linspace(0, M, steps)
+        increments_Rx = linspace(0, Fx, steps)
+        increments_Ry = linspace(0, Fy, steps)
+        increments_M = linspace(0, T, steps)
 
         for i, j, k in zip(increments_Rx, increments_Ry, increments_M):
-            self.calculateStaticsForward(i, j, k)
+            self.calculateStaticsInverse(i, j, k)
