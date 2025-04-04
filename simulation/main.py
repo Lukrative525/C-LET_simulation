@@ -12,7 +12,7 @@ if __name__ == "__main__":
     num_parallel = 2
     bond_region_length = 20e-3
     L = round((available_length - num_parallel * bond_region_length) / num_parallel, 9)
-    torsion_bar_width = 10e-3
+    torsion_bar_width = 10.3e-3
     torsion_bar_thickness = 0.018 * 25.4e-3
     h = torsion_bar_width / 2
     b = torsion_bar_thickness / 2

@@ -1,5 +1,5 @@
 from typing import Self
-from numpy import arctan2, sin, cos, pi, abs, argmin, array
+from numpy import arctan2, sin, cos, pi, argmin
 from matplotlib.axes import Axes
 
 class Joint():
@@ -33,23 +33,31 @@ class Joint():
         for section in self.sections:
             section.rotate(angle_to_rotate)
 
+    def scale(self, scale_factor):
+
+        for section in self.sections:
+            section.scale(scale_factor)
+
     def getTotalDeflection(self, index: int):
 
-        centroids: list[Point] = []
-        angles: list = []
+        if index + 1 > len(self.sections):
+            raise Exception(f"index out of bounds")
 
-        for i in range(index + 2):
-            centroids.append(self.sections[i].centroid())
+        if index + 1 == len(self.sections):
+            centroid_1 = self.sections[index - 1].centroid()
+            centroid_2 = self.sections[index].centroid()
+            translation_vector = centroid_2
+        else:
+            centroid_1 = self.sections[index].centroid()
+            centroid_2 = self.sections[index + 1].centroid()
+            translation_vector = centroid_1
 
-        for i in range(1, index + 2):
-            angles.append(vectorAngle(centroids[i] - centroids[i - 1]))
-
-        translation_vector = self.sections[index].centroid()
+        direction_vector = centroid_2 - centroid_1
+        direction_angle = vectorAngle(direction_vector)
         major_axis_point_1, major_axis_point_2 = self.sections[index].majorAxis()
-        rotation_angle = vectorAngle(major_axis_point_2 - major_axis_point_1)
-
-        possible_rotation_angles = [restrictAngle(rotation_angle + pi / 2), restrictAngle(rotation_angle - pi / 2)]
-        differences = [abs(findDifferenceOfAngles(possible_rotation_angles[0], angles[index])), abs(findDifferenceOfAngles(possible_rotation_angles[1], angles[index]))]
+        major_axis_angle = vectorAngle(major_axis_point_2 - major_axis_point_1)
+        possible_rotation_angles = [restrictAngle(major_axis_angle + pi / 2), restrictAngle(major_axis_angle - pi / 2)]
+        differences = [abs(findDifferenceOfAngles(possible_rotation_angles[0], direction_angle)), abs(findDifferenceOfAngles(possible_rotation_angles[1], direction_angle))]
         rotation_angle = possible_rotation_angles[argmin(differences)]
 
         return translation_vector, rotation_angle
@@ -72,6 +80,12 @@ class Point():
 
         return new_point
 
+    def __mul__(self, other):
+
+        new_point = Point(self.x * other, self.y * other)
+
+        return new_point
+
     def rotate(self, angle):
 
         new_x = self.x * cos(angle) - self.y * sin(angle)
@@ -84,6 +98,11 @@ class Point():
 
         self.x += vector.x
         self.y += vector.y
+
+    def scale(self, scale_factor):
+
+        self.x *= scale_factor
+        self.y *= scale_factor
 
     def __str__(self):
 
@@ -144,6 +163,11 @@ class Section():
 
         for point in self.points:
             point.translate(vector)
+
+    def scale(self, scale_factor):
+
+        for point in self.points:
+            point.scale(scale_factor)
 
 def calculateCentroid(points_list: list[Point]) -> Point:
 

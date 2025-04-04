@@ -81,8 +81,6 @@ class ArrayDeflectionVisualizer(QVBoxLayout):
 
         F_length = (self.let_array.b + self.let_array.h) / 2
         self.axes.clear()
-        self.axes.plot(self.points_x, self.points_y, '-', color='black')
-        self.axes.plot(self.points_x, self.points_y, 'o', color='black')
         for i in range(self.let_array.series):
             end_point = self.let_array.transforms[i, 0:2, 2]
             R = self.let_array.transforms[i, 0:2, 0:2]
@@ -112,6 +110,8 @@ class ArrayDeflectionVisualizer(QVBoxLayout):
             F_norm = norm(F_mid)
             if F_norm != 0:
                 self.axes.arrow(end_point[0], end_point[1], F_length * F_mid[0] / F_norm, F_length * F_mid[1] / F_norm, width=F_length / 50, head_width=F_length / 20)
+        self.axes.plot(self.points_x, self.points_y, '-', color='black')
+        self.axes.plot(self.points_x, self.points_y, 'o', color='black')
         self.axes.set_aspect(1)
         self.canvas.draw()
 

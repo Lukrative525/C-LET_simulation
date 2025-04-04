@@ -1,4 +1,4 @@
-from joint_components import Joint
+from validation.joint_components import Joint
 
 tests = []
 

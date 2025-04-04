@@ -1,6 +1,7 @@
 import numpy as np
-from numpy import sin, cos
+from numpy import sin, cos, linspace
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 from scipy.optimize import fsolve
 import warnings
 warning_behavior = 'ignore'
@@ -357,3 +358,49 @@ class LetArray():
             M = fsolve(error, initial_guess, xtol=1e-9)[0]
 
         self.calculateStaticsForward(-Fx, -Fy, M)
+
+    def plotArray(self, axes: Axes):
+
+        F_length = (self.b + self.h) / 2
+        axes.clear()
+        for i in range(self.series):
+            end_point = self.transforms[i, 0:2, 2]
+            R = self.transforms[i, 0:2, 0:2]
+            points = np.zeros((5, 2))
+            points[0] = end_point + (R @ np.array([2 * self.b, self.h])).T
+            points[1] = end_point + (R @ np.array([0, self.h])).T
+            points[2] = end_point + (R @ np.array([0, -self.h])).T
+            points[3] = end_point + (R @ np.array([2 * self.b, -self.h])).T
+            points[4] = end_point + (R @ np.array([2 * self.b, self.h])).T
+            axes.plot(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
+            axes.fill(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
+            end_point = self.transforms[i + 1, 0:2, 2]
+            R = self.transforms[i + 1, 0:2, 0:2]
+            points = np.zeros((5, 2))
+            points[0] = end_point + (R @ np.array([0, self.h])).T
+            points[1] = end_point + (R @ np.array([-2 * self.b, self.h])).T
+            points[2] = end_point + (R @ np.array([-2 * self.b, -self.h])).T
+            points[3] = end_point + (R @ np.array([0, -self.h])).T
+            points[4] = end_point + (R @ np.array([0, self.h])).T
+            axes.plot(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
+            axes.fill(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
+        axes.plot(self.transforms[:, 0, 2], self.transforms[:, 1, 2], color=self.cmap(0))
+        axes.plot(self.transforms[:, 0, 2], self.transforms[:, 1, 2], 'o', color=self.cmap(0))
+        for i in range(self.series):
+            end_point = self.transforms[i, 0:2, 2]
+            F_mid = np.array([self.Fx_mid[i], self.Fy_mid[i]])
+            F_norm = np.linalg.norm(F_mid)
+            if F_norm != 0:
+                axes.arrow(end_point[0], end_point[1], F_length * F_mid[0] / F_norm, F_length * F_mid[1] / F_norm, width=F_length / 50, head_width=F_length / 20)
+        axes.set_aspect(1)
+
+    def graduallyReposition(self, Rx, Ry, M, steps):
+
+        steps = max(steps, 2)
+
+        increments_Rx = linspace(0, Rx, steps)
+        increments_Ry = linspace(0, Ry, steps)
+        increments_M = linspace(0, M, steps)
+
+        for i, j, k in zip(increments_Rx, increments_Ry, increments_M):
+            self.calculateStaticsForward(i, j, k)
