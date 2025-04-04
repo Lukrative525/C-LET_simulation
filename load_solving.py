@@ -9,7 +9,7 @@ def sequentiallyMinimizeDeflectionError(iterations: int, array: am.LetArray, tar
 
     for i in range(iterations):
         loading = takeStep(0, array, target_deflection, loading, step_sizes)
-        loading = takeStep(1, array, target_deflection, loading, step_sizes)
+        # loading = takeStep(1, array, target_deflection, loading, step_sizes)
         loading = takeStep(2, array, target_deflection, loading, step_sizes)
 
     return loading
@@ -72,16 +72,16 @@ target_x = -0.0007868328311495939
 target_y = 0.013409784928369698
 target_theta = radians(182.66006427766135)
 
-iterations = 100
-Fx = -1.427
-Fy = -6.53
-T = 0.2014
+iterations = 10
+Fx = -0.8262
+Fy = 0
+T = 0.20694
 loading = [Fx, Fy, T]
 array.graduallyReposition(Fx, Fy, T, 10)
 
 target_deflection = [target_x, target_y, target_theta]
 
-loading = sequentiallyMinimizeDeflectionError(iterations, array, target_deflection, loading, [0.001, 0.01, 0.0001])
+loading = sequentiallyMinimizeDeflectionError(iterations, array, target_deflection, loading, [0.0001, 0.0, 0.00001])
 print(loading)
 
 figure = plt.figure()
