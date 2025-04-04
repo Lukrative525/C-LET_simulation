@@ -9,7 +9,7 @@ def sequentiallyMinimizeDeflectionError(iterations: int, array: am.LetArray, tar
 
     for i in range(iterations):
         loading = takeStep(0, array, target_deflection, loading, step_sizes)
-        # loading = takeStep(1, array, target_deflection, loading, step_sizes)
+        loading = takeStep(1, array, target_deflection, loading, step_sizes)
         loading = takeStep(2, array, target_deflection, loading, step_sizes)
 
     return loading
@@ -68,20 +68,25 @@ b = torsion_bar_thickness / 2
 
 array = am.LetArray(b, h, L, E, G, Sy, num_series)
 
-target_x = -0.00012647289400406376
-target_y = 0.02198881064921992
-target_theta = radians(181.84423130603108)
+# ===============================================
+target_x = -0.0007868328311495939
+target_y = 0.013409784928369698
+target_theta = radians(182.66006427766135)
+Fx = -0.8262
+Fy = 0 # (ignored)
+T = 0.2069
+test_index = 0
+step_sizes = [0.0001, 0.0, 0.0001]
+# ===============================================
 
-iterations = 1
-Fx = 0.0244
-Fy = 1.5765
-T = 0.2134
+iterations = 100
+
 loading = [Fx, Fy, T]
 array.graduallyReposition(Fx, Fy, T, 10)
 
 target_deflection = [target_x, target_y, target_theta]
 
-loading = sequentiallyMinimizeDeflectionError(iterations, array, target_deflection, loading, [0.0001, 0.0001, 0.00001])
+loading = sequentiallyMinimizeDeflectionError(iterations, array, target_deflection, loading, step_sizes)
 print(loading)
 
 figure = plt.figure()
@@ -91,7 +96,7 @@ axes.set_aspect("equal")
 array.graduallyReposition(Fx, Fy, T, 10)
 array.plotArray(axes)
 
-joint: Joint = tests[1]
+joint: Joint = tests[test_index]
 joint.scale(25.4e-3)
 joint.rotateAndCenter()
 

@@ -1,15 +1,19 @@
-tests[0]:
+test 1:
 target_x = -0.0007868328311495939
 target_y = 0.013409784928369698
 target_theta = radians(182.66006427766135)
 Fx = -0.8262
-Fy = 0 (ignored)
+Fy = 0 # (ignored)
 T = 0.20694
+test_index = 0
+step_sizes = [0.0001, 0.0, 0.00001]
 
-tests[1]:
+tests 2:
 target_x = -0.00012647289400406376
 target_y = 0.02198881064921992
 target_theta = radians(181.84423130603108)
 Fx = 0.0244
-Fy = 1.5765
+Fy = 1.5769
 T = 0.2134
+test_index = 1
+step_sizes = [0.0001, 0.0001, 0.0001]
