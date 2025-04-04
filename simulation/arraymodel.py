@@ -305,9 +305,17 @@ class LetArray():
 
         return index_max, max_von_mises
 
+    def getPosition(self, index):
+
+        return self.transforms[index][:2, 2]
+
     def getEndPosition(self):
 
-        return self.transforms[-1][:2, 2]
+        return self.getPosition(-1)
+
+    def getRotation(self, index):
+
+        return np.sum(self.gammas[:index + 1])
 
     def getEndRotation(self):
 

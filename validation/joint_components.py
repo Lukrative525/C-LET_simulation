@@ -135,7 +135,7 @@ class Section():
     def majorAxis(self):
 
         """
-        assumes a line connecting the two shortest segments forms the major axis of the section
+        assumes a line connecting the midpoints of the two shortest segments forms the major axis of the section
         """
 
         if len(self.points) <= 2:
@@ -233,6 +233,10 @@ def plotSection(axes: Axes, section: Section):
         loopPoints(y_values)
 
     axes.plot(x_values, y_values)
+
+    center = section.centroid()
+
+    axes.plot(center.x, center.y, 'ko')
 
 def plotLine(axes: Axes, points: list[Point]):
 

@@ -50,6 +50,7 @@ def updateDeflection(array: am.LetArray, loading: list, deflection: list):
 
     array.calculateStaticsInverse(*loading, M)
     deflection[0], deflection[1] = array.getEndPosition()
+    print(array.getEndPosition())
     deflection[2] = array.getEndRotation()
 
 E = am.msiToPa(9.8)
@@ -79,7 +80,7 @@ test_index = 0
 step_sizes = [0.0001, 0.0, 0.0001]
 # ===============================================
 
-iterations = 100
+iterations = 10
 
 loading = [Fx, Fy, T]
 array.graduallyReposition(Fx, Fy, T, 10)

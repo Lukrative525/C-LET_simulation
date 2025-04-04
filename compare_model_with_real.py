@@ -3,6 +3,34 @@ import simulation.arraymodel as am
 from validation.joint_components import *
 from validation.deflection_data import tests
 
+def positionError(model: am.LetArray, data: Joint):
+
+    error = []
+
+    for i in range(model.series):
+        if i % 2 == 1:
+            model_position = Point(*model.getPosition(i))
+            data_position = data.sections[int((i + 1) / 2)].centroid()
+            difference = model_position - data_position
+
+            error.append(vectorNorm(difference))
+
+    return error
+
+def angularError(model: am.LetArray, data: Joint):
+
+    error = []
+
+    for i in range(model.series):
+        if i % 2 == 1:
+            model_rotation = model.getRotation(i)
+            point_1, point_2 = data.sections[int((i + 1) / 2)].majorAxis()
+            data_rotation = vectorAngle(point_2 - point_1)
+
+            error.append(abs(findDifferenceOfAngles(model_rotation, data_rotation)))
+
+    return error
+
 E = am.msiToPa(9.8)
 G = am.msiToPa(18.4)
 Sy = am.msiToPa(120e-3)
@@ -19,9 +47,13 @@ b = torsion_bar_thickness / 2
 
 array = am.LetArray(b, h, L, E, G, Sy, num_series)
 
+# ===============================================
 Fx = -0.8262
 Fy = 0 # (ignored)
 T = 0.20694
+test_index = 0
+# ===============================================
+
 loading = [Fx, Fy, T]
 array.graduallyReposition(Fx, Fy, T, 10)
 
@@ -31,9 +63,12 @@ axes.set_aspect("equal")
 
 array.plotArray(axes)
 
-joint: Joint = tests[0]
+joint: Joint = tests[test_index]
 joint.scale(25.4e-3)
 joint.rotateAndCenter()
 plotJoint(axes, joint)
+
+print(positionError(array, joint))
+print(angularError(array, joint))
 
 plt.show()
