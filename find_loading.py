@@ -1,9 +1,8 @@
 from matplotlib import pyplot as plt
 import simulation.arraymodel as am
-from numpy import linspace, radians
-from scipy.optimize import minimize
-from validation.joint_components import *
-from validation.deflection_data import tests
+from numpy import radians
+from validation.visualization_components import *
+from validation.deflection_measurements import tests
 
 def sequentiallyMinimizeDeflectionError(iterations: int, array: am.LetArray, target_deflection: list, loading: list, step_sizes: list):
 

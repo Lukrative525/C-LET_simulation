@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 import simulation.arraymodel as am
-from validation.joint_components import *
-from validation.deflection_data import tests
+from validation.visualization_components import *
+from validation.deflection_measurements import tests
 from numpy import degrees, set_printoptions
 
 set_printoptions(legacy="1.25")

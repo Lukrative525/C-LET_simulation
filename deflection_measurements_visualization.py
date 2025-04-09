@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
-from joint_components import *
-from deflection_data import tests
+from validation.visualization_components import *
+from validation.deflection_measurements import tests
 from numpy import degrees
 
 joint: Joint = tests[0]

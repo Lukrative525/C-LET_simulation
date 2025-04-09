@@ -18,16 +18,14 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QStackedLayout,
     QSpacerItem,
-    QSpinBox,
-    QAbstractSpinBox
+    QSpinBox
 )
 import matplotlib
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
-import warnings
-from arraymodel import LetArray
+from simulation.arraymodel import LetArray
 
 def getDecimals(number):
 
