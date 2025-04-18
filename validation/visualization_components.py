@@ -232,7 +232,7 @@ def plotSection(axes: Axes, section: Section):
         loopPoints(x_values)
         loopPoints(y_values)
 
-    axes.plot(x_values, y_values)
+    axes.plot(x_values, y_values, 'k')
 
     center = section.centroid()
 

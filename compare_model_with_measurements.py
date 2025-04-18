@@ -33,6 +33,19 @@ def angularError(model: am.LetArray, data: Joint):
 
     return error
 
+def rootMeanSquareError(error: list):
+
+    rms_error = 0
+
+    for entry in error:
+        rms_error += entry ** 2
+
+    rms_error = rms_error / len(error)
+
+    rms_error = rms_error ** (1 / 2)
+
+    return rms_error
+
 E = am.msiToPa(9.8)
 G = am.msiToPa(18.4)
 Sy = am.msiToPa(120e-3)
@@ -50,10 +63,10 @@ b = torsion_bar_thickness / 2
 array = am.LetArray(b, h, L, E, G, Sy, num_series)
 
 # ===============================================
-Fx = 0.0244
-Fy = 1.5769
-T = 0.2134
-test_index = 1
+Fx = -0.8262
+Fy = 0 # (ignored)
+T = 0.20694
+test_index = 0
 # ===============================================
 
 loading = [Fx, Fy, T]
@@ -75,5 +88,11 @@ rotation_error = angularError(array, joint)
 
 print(position_error)
 print(degrees(rotation_error))
+
+rms_position_error = rootMeanSquareError(position_error)
+rms_rotation_error = rootMeanSquareError(rotation_error)
+
+print(rms_position_error * 1e3)
+print(degrees(rms_rotation_error))
 
 plt.show()
