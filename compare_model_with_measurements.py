@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 import simulation.arraymodel as am
 from validation.visualization_components import *
 from validation.deflection_measurements import tests
-from numpy import degrees, set_printoptions
+from numpy import array, degrees, set_printoptions
 
 set_printoptions(legacy="1.25")
 
@@ -60,7 +60,7 @@ torsion_bar_thickness = 0.018 * 25.4e-3
 h = torsion_bar_width / 2
 b = torsion_bar_thickness / 2
 
-array = am.LetArray(b, h, L, E, G, Sy, num_series)
+let_array = am.LetArray(b, h, L, E, G, Sy, num_series)
 
 # ===============================================
 Fx = -0.8262
@@ -70,29 +70,35 @@ test_index = 0
 # ===============================================
 
 loading = [Fx, Fy, T]
-array.graduallyReposition(Fx, Fy, T, 10)
+let_array.graduallyReposition(Fx, Fy, T, 10)
 
 figure = plt.figure()
 axes = figure.add_subplot()
 axes.set_aspect("equal")
 
-array.plotArray(axes)
+let_array.plotArray(axes)
 
 joint: Joint = tests[test_index]
 joint.scale(25.4e-3)
 joint.rotateAndCenter()
 plotJoint(axes, joint)
 
-position_error = positionError(array, joint)
-rotation_error = angularError(array, joint)
+position_error = array(positionError(let_array, joint))
+rotation_error = angularError(let_array, joint)
 
-print(position_error)
+print("Position Error (mm):")
+print(position_error * 1e3)
+print("Rotation Error (deg):")
 print(degrees(rotation_error))
 
 rms_position_error = rootMeanSquareError(position_error)
 rms_rotation_error = rootMeanSquareError(rotation_error)
 
+print("RMS Position Error (mm):")
 print(rms_position_error * 1e3)
+print("RMS Position Error / Torsion Bar Width")
+print(rms_position_error / torsion_bar_width)
+print("RMS Rotation Error (deg)")
 print(degrees(rms_rotation_error))
 
 plt.show()
