@@ -10,7 +10,7 @@ Torsion Bar Visualization
 
 ## How to Run
 
-Download the project zip file and extract it. Navigate to the folder containing the extracted files and set it to your working directory. Then run `simulation.py`.
+Download the project zip file and extract it. Navigate to the folder containing the extracted files and set it as your working directory. Then run `simulation.py`.
 
 ### Dependencies
 
@@ -22,3 +22,5 @@ numpy 2.2.3
 PyQt6 6.8.2
 scipy 1.15.2
 ```
+
+If you want to run `equations.py` from the *derivation* folder, it will require the `sympy` package. Version 1.13.3 was used for this project.
