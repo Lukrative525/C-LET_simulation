@@ -1,11 +1,14 @@
+'''
+This script was used in obtaining the statics equations used to calculate torsion bar deflections. Sympy seems incapable of solving the system of equations for case 2. If you run this, be prepared to wait a few minutes before the solver gives up and moves on.
+'''
+
 # %%
 
 import sympy as sp
 from sympy import sin, cos
-from symbolic_tools import disp
 
 # %%
-# case 1, reaction forces act through center of outer edge
+# case 1: reaction forces act through center of outer edge
 
  #####      #      #####   #######              #     
 #     #    # #    #     #  #                  ###     
@@ -29,18 +32,6 @@ eq9 = sp.Eq(T - Ms + Fy * b * cos(2 * theta) - Fx * b * sin(2 * theta), 0)
 eq10 = sp.Eq(delta, kb * (Fsx * cos(theta) + Fsy * sin(theta)))
 eq11 = sp.Eq(theta, kt * Ms)
 
-print(sp.latex(eq1))
-print(sp.latex(eq2))
-print(sp.latex(eq3))
-print(sp.latex(eq4))
-print(sp.latex(eq5))
-print(sp.latex(eq6))
-print(sp.latex(eq7))
-print(sp.latex(eq8))
-print(sp.latex(eq9))
-print(sp.latex(eq10))
-print(sp.latex(eq11))
-
 Fx_expression = sp.solve(eq1, Fx)[0]
 Fy_expression = sp.solve(eq2, Fy)[0]
 Fsx_expression = sp.solve(eq4, Fsx)[0]
@@ -51,20 +42,11 @@ delta_expression = sp.solve(eq10, delta)[0]
 theta_expression = sp.solve(eq11, theta)[0]
 
 solution = sp.solve([eq1, eq2, eq4, eq5, eq6, eq9, eq10, eq11], [Fx, Fy, T, Fsx, Fsy, Ms, theta, delta])
-for expression in solution[0]:
-    disp(expression)
 
-print(sp.latex(Fx_expression))
-print(sp.latex(Fy_expression))
-print(sp.latex(Fsx_expression))
-print(sp.latex(Fsy_expression))
-print(sp.latex(Ms_expression))
-print(sp.latex(T_expression))
-print(sp.latex(delta_expression))
-print(sp.latex(theta_expression))
+print(solution)
 
 # %%
-# case 2, reaction forces act through center of outer edge
+# case 2: reaction forces act through center of outer edge, and top edges are touching
 
  #####      #      #####   #######            #####   
 #     #    # #    #     #  #                 #     #  
@@ -89,24 +71,12 @@ eq10 = sp.Eq(T - Ms + Fy * b * cos(2 * theta) - Fx * b * sin(2 * theta) + Py * h
 eq11 = sp.Eq(delta, kb * (Fsx * cos(theta) + Fsy * sin(theta)))
 eq12 = sp.Eq(theta, kt * Ms)
 
-print(sp.latex(eq1))
-print(sp.latex(eq2))
-print(sp.latex(eq3))
-print(sp.latex(eq4))
-print(sp.latex(eq5))
-print(sp.latex(eq6))
-print(sp.latex(eq7))
-# print(sp.latex(eq8))
-# print(sp.latex(eq9))
-print(sp.latex(eq10))
-print(sp.latex(eq11))
-print(sp.latex(eq12))
-
 solution = sp.solve([eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq10, eq11, eq12], [Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, theta, delta])
-disp(solution)
+
+print(solution)
 
 # %%
-# case 3, same as case 2, but using small angle approximations
+# case 3: same as case 2, but using small angle approximations
 
  #####      #      #####   #######            #####   
 #     #    # #    #     #  #                 #     #  
@@ -149,19 +119,7 @@ print(sp.latex(eq10))
 print(sp.latex(eq11))
 print(sp.latex(eq12))
 
-# A = sp.sqrt(-4*M*Rx*h*kb**2*kt**2 + Rx**2*b**2*kb**2*kt**2 - 4*Rx**2*h**2*kb**2*kt**2 + 4*Rx*Ry*b*h*kb**2*kt**2 - 2*Rx*b**2*kb**2*kt**2 - 4*Rx*b*h**2*kb*kt**2 - 2*Rx*b*kb**2*kt + b**2*kb**2*kt**2 + 4*b*h**2*kb*kt**2 + 2*b*kb**2*kt + 4*h**4*kt**2 + 4*h**2*kb*kt + kb**2)
-
 solution = sp.solve([eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq10, eq11, eq12], [Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, theta, delta])
-for expression_0, expression_1 in zip(solution[0], solution[1]):
-    print("expressions:")
-    # print(expression_0)
-    # print(expression_1)
-    disp(expression_0.subs(sp.sqrt(-4*M*Rx*h*kb**2*kt**2 + Rx**2*b**2*kb**2*kt**2 - 4*Rx**2*h**2*kb**2*kt**2 + 4*Rx*Ry*b*h*kb**2*kt**2 - 2*Rx*b**2*kb**2*kt**2 - 4*Rx*b*h**2*kb*kt**2 - 2*Rx*b*kb**2*kt + b**2*kb**2*kt**2 + 4*b*h**2*kb*kt**2 + 2*b*kb**2*kt + 4*h**4*kt**2 + 4*h**2*kb*kt + kb**2), A))
-    disp(expression_1.subs(sp.sqrt(-4*M*Rx*h*kb**2*kt**2 + Rx**2*b**2*kb**2*kt**2 - 4*Rx**2*h**2*kb**2*kt**2 + 4*Rx*Ry*b*h*kb**2*kt**2 - 2*Rx*b**2*kb**2*kt**2 - 4*Rx*b*h**2*kb*kt**2 - 2*Rx*b*kb**2*kt + b**2*kb**2*kt**2 + 4*b*h**2*kb*kt**2 + 2*b*kb**2*kt + 4*h**4*kt**2 + 4*h**2*kb*kt + kb**2), A))
 
-# solution = sp.solve([eq7], [Px])
-# for expression in solution:
-#     print("expressions:")
-#     # print(expression)
-#     disp(expression)
+print(solution)
 # %%
