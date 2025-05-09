@@ -1,6 +1,6 @@
-# Compact Lamina-emergent Torsional (C-LET) arrays
+# C-LET Array Simulation
 
-This repository contains python code developed for simulating the deflections of C-LET arrays.
+This repository contains python code originally developed by Luke Gardner for the BYU Compliant Mechanisms Research Group for simulating the deflections of compact lamina-emergent torsional (C-LET) arrays.
 
 LET Array Visualization
 ![image](https://github.com/user-attachments/assets/b809947a-1f01-405a-a33a-da34b00e9544)
