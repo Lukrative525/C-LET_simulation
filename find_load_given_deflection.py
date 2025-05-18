@@ -47,7 +47,7 @@ def updateDeflection(array: am.LetArray, loading: list, deflection: list):
 
     M = array.getReactions()[2]
 
-    array.calculateStaticsInverse(*loading, M)
+    array.calculateStaticsInverse(loading[0], loading[1], loading[2], M)
     deflection[0], deflection[1] = array.getEndPosition()
     print(array.getEndPosition())
     deflection[2] = array.getEndRotation()
