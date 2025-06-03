@@ -4,8 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from scipy.optimize import fsolve
 import warnings
-warning_behavior = 'ignore'
-# warning_behavior = 'always'
+warning_behavior = 'always'
 
 def msiToPa(msi):
 
@@ -184,9 +183,12 @@ class LetArray():
                     T = 2 * self.b * Ry - M
                     delta = 0
                 else:
-                    with warnings.catch_warnings():
+                    with warnings.catch_warnings(record=True) as caught_warnings:
                         warnings.simplefilter(warning_behavior)
                         Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(interferenceStatics, initial_guess, xtol=1e-9)
+                        error = interferenceStatics([Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta])
+                        if np.any(np.abs(error) > 1e-9):
+                            print(f"Error values: {error}")
 
                 if delta <= 0:
                     Fx = -Rx
@@ -315,7 +317,7 @@ class LetArray():
 
     def getRotation(self, index):
 
-        return np.sum(self.gammas[:index + 1])
+        return np.sum(self.gammas[:index])
 
     def getEndRotation(self):
 
@@ -344,9 +346,9 @@ class LetArray():
 
     def calculateStaticsInverse(self, Fx, Fy, T, guess=None):
 
-        def error(parameters):
+        def calculateError(parameters):
 
-            M = parameters[0]
+            [M] = parameters
 
             self.calculateStaticsForward(-Fx, -Fy, M)
 
@@ -361,9 +363,12 @@ class LetArray():
         else:
             initial_guess = -T
 
-        with warnings.catch_warnings():
+        with warnings.catch_warnings(record=True) as caught_warnings:
             warnings.simplefilter(warning_behavior)
-            M = fsolve(error, initial_guess, xtol=1e-9)[0]
+            M = fsolve(calculateError, initial_guess, xtol=1e-9)[0]
+            error = calculateError([M])
+            if abs(error) > 1e-9:
+                print(f"M error: {error}")
 
         self.calculateStaticsForward(-Fx, -Fy, M)
 
