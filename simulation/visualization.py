@@ -77,8 +77,23 @@ class ArrayDeflectionVisualizer(QVBoxLayout):
 
     def updatePlot(self):
 
+        scale = 1000
+
         F_length = (self.let_array.b + self.let_array.h) / 2
         self.axes.clear()
+
+        major_ticks = np.arange(-40, 41, 5)
+        minor_ticks = np.arange(-40, 41, 1)
+        self.axes.tick_params(axis="both", which="major", labelsize=18)
+        self.axes.set_xticks(major_ticks)
+        self.axes.set_xticks(minor_ticks, minor=True)
+        self.axes.set_yticks(major_ticks)
+        self.axes.set_yticks(minor_ticks, minor=True)
+        self.axes.grid(True, "both")
+        self.axes.grid(which='minor', alpha=0.2)
+        self.axes.grid(which='major', alpha=0.8)
+        self.axes.set_axisbelow(True)
+
         for i in range(self.let_array.series):
             end_point = self.let_array.transforms[i, 0:2, 2]
             R = self.let_array.transforms[i, 0:2, 0:2]
@@ -88,8 +103,8 @@ class ArrayDeflectionVisualizer(QVBoxLayout):
             points[2] = end_point + (R @ np.array([0, -self.let_array.h])).T
             points[3] = end_point + (R @ np.array([2 * self.let_array.b, -self.let_array.h])).T
             points[4] = end_point + (R @ np.array([2 * self.let_array.b, self.let_array.h])).T
-            self.axes.plot(points[:, 0], points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
-            self.axes.fill(points[:, 0], points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
+            self.axes.plot(scale * points[:, 0], scale * points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
+            self.axes.fill(scale * points[:, 0], scale * points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
             end_point = self.let_array.transforms[i + 1, 0:2, 2]
             R = self.let_array.transforms[i + 1, 0:2, 0:2]
             points = np.zeros((5, 2))
@@ -98,18 +113,18 @@ class ArrayDeflectionVisualizer(QVBoxLayout):
             points[2] = end_point + (R @ np.array([-2 * self.let_array.b, -self.let_array.h])).T
             points[3] = end_point + (R @ np.array([0, -self.let_array.h])).T
             points[4] = end_point + (R @ np.array([0, self.let_array.h])).T
-            self.axes.plot(points[:, 0], points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
-            self.axes.fill(points[:, 0], points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
-        self.axes.plot(self.let_array.transforms[:, 0, 2], self.let_array.transforms[:, 1, 2], color=self.let_array.cmap(0))
-        self.axes.plot(self.let_array.transforms[:, 0, 2], self.let_array.transforms[:, 1, 2], 'o', color=self.let_array.cmap(0))
+            self.axes.plot(scale * points[:, 0], scale * points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
+            self.axes.fill(scale * points[:, 0], scale * points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
+        self.axes.plot(scale * self.let_array.transforms[:, 0, 2], scale * self.let_array.transforms[:, 1, 2], color=self.let_array.cmap(0))
+        self.axes.plot(scale * self.let_array.transforms[:, 0, 2], scale * self.let_array.transforms[:, 1, 2], 'o', color=self.let_array.cmap(0))
         for i in range(self.let_array.series):
             end_point = self.let_array.transforms[i, 0:2, 2]
             F_mid = np.array([self.let_array.Fx_mid[i], self.let_array.Fy_mid[i]])
             F_norm = norm(F_mid)
             if F_norm != 0:
-                self.axes.arrow(end_point[0], end_point[1], F_length * F_mid[0] / F_norm, F_length * F_mid[1] / F_norm, width=F_length / 50, head_width=F_length / 20)
-        self.axes.plot(self.points_x, self.points_y, '-', color='black')
-        self.axes.plot(self.points_x, self.points_y, 'o', color='black')
+                self.axes.arrow(scale * end_point[0], scale * end_point[1], scale * F_length * F_mid[0] / F_norm, scale * F_length * F_mid[1] / F_norm, width=scale * F_length / 50, head_width=scale * F_length / 20)
+        self.axes.plot(scale * np.array(self.points_x), scale * np.array(self.points_y), '-', color='black')
+        self.axes.plot(scale * np.array(self.points_x), scale * np.array(self.points_y), 'o', color='black')
         self.axes.set_aspect(1)
         self.canvas.draw()
 

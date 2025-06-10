@@ -374,8 +374,23 @@ class LetArray():
 
     def plotArray(self, axes: Axes):
 
+        scale = 1000
+
         F_length = (self.b + self.h) / 2
         axes.clear()
+
+        major_ticks = np.arange(-40, 41, 5)
+        minor_ticks = np.arange(-40, 41, 1)
+        axes.tick_params(axis="both", which="major", labelsize=18)
+        axes.set_xticks(major_ticks)
+        axes.set_xticks(minor_ticks, minor=True)
+        axes.set_yticks(major_ticks)
+        axes.set_yticks(minor_ticks, minor=True)
+        axes.grid(True, "both")
+        axes.grid(which='minor', alpha=0.2)
+        axes.grid(which='major', alpha=0.8)
+        axes.set_axisbelow(True)
+
         for i in range(self.series):
             end_point = self.transforms[i, 0:2, 2]
             R = self.transforms[i, 0:2, 0:2]
@@ -385,8 +400,8 @@ class LetArray():
             points[2] = end_point + (R @ np.array([0, -self.h])).T
             points[3] = end_point + (R @ np.array([2 * self.b, -self.h])).T
             points[4] = end_point + (R @ np.array([2 * self.b, self.h])).T
-            axes.plot(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
-            axes.fill(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
+            axes.plot(scale * points[:, 0], scale * points[:, 1], color=self.cmap(i % 10), alpha=0.5)
+            axes.fill(scale * points[:, 0], scale * points[:, 1], color=self.cmap(i % 10), alpha=0.5)
             end_point = self.transforms[i + 1, 0:2, 2]
             R = self.transforms[i + 1, 0:2, 0:2]
             points = np.zeros((5, 2))
@@ -395,16 +410,16 @@ class LetArray():
             points[2] = end_point + (R @ np.array([-2 * self.b, -self.h])).T
             points[3] = end_point + (R @ np.array([0, -self.h])).T
             points[4] = end_point + (R @ np.array([0, self.h])).T
-            axes.plot(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
-            axes.fill(points[:, 0], points[:, 1], color=self.cmap(i % 10), alpha=0.5)
-        axes.plot(self.transforms[:, 0, 2], self.transforms[:, 1, 2], color=self.cmap(0))
-        axes.plot(self.transforms[:, 0, 2], self.transforms[:, 1, 2], 'o', color=self.cmap(0))
+            axes.plot(scale * points[:, 0], scale * points[:, 1], color=self.cmap(i % 10), alpha=0.5)
+            axes.fill(scale * points[:, 0], scale * points[:, 1], color=self.cmap(i % 10), alpha=0.5)
+        axes.plot(scale * self.transforms[:, 0, 2], scale * self.transforms[:, 1, 2], color=self.cmap(0))
+        axes.plot(scale * self.transforms[:, 0, 2], scale * self.transforms[:, 1, 2], 'o', color=self.cmap(0))
         for i in range(self.series):
             end_point = self.transforms[i, 0:2, 2]
             F_mid = np.array([self.Fx_mid[i], self.Fy_mid[i]])
             F_norm = np.linalg.norm(F_mid)
             if F_norm != 0:
-                axes.arrow(end_point[0], end_point[1], F_length * F_mid[0] / F_norm, F_length * F_mid[1] / F_norm, width=F_length / 50, head_width=F_length / 20)
+                axes.arrow(scale * end_point[0], scale * end_point[1], scale * F_length * F_mid[0] / F_norm, scale * F_length * F_mid[1] / F_norm, width=scale * F_length / 50, head_width=scale * F_length / 20)
         axes.set_aspect(1)
 
     def graduallyReposition(self, Fx, Fy, T, steps):

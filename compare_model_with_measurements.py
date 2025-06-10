@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 import simulation.arraymodel as am
 from validation.visualization_components import *
 from validation.deflection_measurements import tests
-from numpy import array, degrees, set_printoptions
+from numpy import array, degrees, set_printoptions, arange
 
 set_printoptions(legacy="1.25")
 
@@ -63,10 +63,10 @@ b = torsion_bar_thickness / 2
 let_array = am.LetArray(b, h, L, E, G, Sy, num_series)
 
 # ===============================================
-Fx = -0.8262
-Fy = 0 # (ignored)
-T = 0.20694
-test_index = 0
+Fx = 0.0244
+Fy = 1.5769
+T = 0.2134
+test_index = 1
 # ===============================================
 
 loading = [Fx, Fy, T]
@@ -74,14 +74,12 @@ let_array.graduallyReposition(Fx, Fy, T, 10)
 
 figure = plt.figure()
 axes = figure.add_subplot()
-axes.set_aspect("equal")
 
 let_array.plotArray(axes)
 
 joint: Joint = tests[test_index]
 joint.scale(25.4e-3)
 joint.rotateAndCenter()
-plotJoint(axes, joint)
 
 position_error = array(positionError(let_array, joint))
 rotation_error = angularError(let_array, joint)
@@ -100,5 +98,8 @@ print("RMS Position Error / Torsion Bar Width")
 print(rms_position_error / torsion_bar_width)
 print("RMS Rotation Error (deg)")
 print(degrees(rms_rotation_error))
+
+joint.scale(1000)
+plotJoint(axes, joint)
 
 plt.show()
