@@ -39,7 +39,7 @@ def transformConstructor(b):
 
 class LetArray():
 
-    def __init__(self, b, h, L, E, G, Sy, series):
+    def __init__(self, b, h, L, E, G, Sy, series, gap=0):
 
         self.b = b
         self.h = h
@@ -48,11 +48,12 @@ class LetArray():
         self.G = G
         self.Sy = Sy
         self.series = series
+        self.gap = gap
 
         self.Ix = (2 * self.b) * (2 * self.h) ** 3 / 12
         self.Iy = (2 * self.h) * (2 * self.b) ** 3 / 12
 
-        self.T = transformConstructor(self.b)
+        self.T = transformConstructor(self.b + self.gap / 2)
         self.calculateTorsionSpringConstant()
         self.calculateBendingSpringConstant()
 
@@ -143,16 +144,16 @@ class LetArray():
 
             # =====================================================================================
 
-            Ms = Ry * self.b - M
+            Ms = Ry * (self.b + self.gap / 2) - M
             theta = self.torsion_constant * Ms
             Fsx = -Rx
             Fsy = -Ry
             delta = self.bending_constant * (Fsx * cos(theta) + Fsy * sin(theta))
             Fx = -Rx
             Fy = -Ry
-            T = Fx * self.b * sin(2 * theta) - Fy * self.b * cos(2 * theta) + Ms
+            T = Fx * (self.b + self.gap / 2) * sin(2 * theta) - Fy * (self.b + self.gap / 2) * cos(2 * theta) + Ms
 
-            if delta < 2 * self.h * sin(abs(theta)):
+            if self.gap == 0 and delta < 2 * self.h * sin(abs(theta)):
 
                 def interferenceStatics(X):
 

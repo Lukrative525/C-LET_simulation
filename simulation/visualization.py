@@ -82,37 +82,37 @@ class ArrayDeflectionVisualizer(QVBoxLayout):
         F_length = (self.let_array.b + self.let_array.h) / 2
         self.axes.clear()
 
-        major_ticks = np.arange(-40, 41, 5)
-        minor_ticks = np.arange(-40, 41, 1)
-        self.axes.tick_params(axis="both", which="major", labelsize=18)
-        self.axes.set_xticks(major_ticks)
-        self.axes.set_xticks(minor_ticks, minor=True)
-        self.axes.set_yticks(major_ticks)
-        self.axes.set_yticks(minor_ticks, minor=True)
-        self.axes.grid(True, "both")
-        self.axes.grid(which='minor', alpha=0.2)
-        self.axes.grid(which='major', alpha=0.8)
-        self.axes.set_axisbelow(True)
+        # major_ticks = np.arange(-40, 41, 5)
+        # minor_ticks = np.arange(-40, 41, 1)
+        # self.axes.tick_params(axis="both", which="major", labelsize=18)
+        # self.axes.set_xticks(major_ticks)
+        # self.axes.set_xticks(minor_ticks, minor=True)
+        # self.axes.set_yticks(major_ticks)
+        # self.axes.set_yticks(minor_ticks, minor=True)
+        # self.axes.grid(True, "both")
+        # self.axes.grid(which='minor', alpha=0.2)
+        # self.axes.grid(which='major', alpha=0.8)
+        # self.axes.set_axisbelow(True)
 
         for i in range(self.let_array.series):
             end_point = self.let_array.transforms[i, 0:2, 2]
             R = self.let_array.transforms[i, 0:2, 0:2]
             points = np.zeros((5, 2))
-            points[0] = end_point + (R @ np.array([2 * self.let_array.b, self.let_array.h])).T
-            points[1] = end_point + (R @ np.array([0, self.let_array.h])).T
-            points[2] = end_point + (R @ np.array([0, -self.let_array.h])).T
-            points[3] = end_point + (R @ np.array([2 * self.let_array.b, -self.let_array.h])).T
-            points[4] = end_point + (R @ np.array([2 * self.let_array.b, self.let_array.h])).T
+            points[0] = end_point + (R @ np.array([2 * self.let_array.b + self.let_array.gap / 2, self.let_array.h])).T
+            points[1] = end_point + (R @ np.array([self.let_array.gap / 2, self.let_array.h])).T
+            points[2] = end_point + (R @ np.array([self.let_array.gap / 2, -self.let_array.h])).T
+            points[3] = end_point + (R @ np.array([2 * self.let_array.b + self.let_array.gap / 2, -self.let_array.h])).T
+            points[4] = end_point + (R @ np.array([2 * self.let_array.b + self.let_array.gap / 2, self.let_array.h])).T
             self.axes.plot(scale * points[:, 0], scale * points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
             self.axes.fill(scale * points[:, 0], scale * points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
             end_point = self.let_array.transforms[i + 1, 0:2, 2]
             R = self.let_array.transforms[i + 1, 0:2, 0:2]
             points = np.zeros((5, 2))
-            points[0] = end_point + (R @ np.array([0, self.let_array.h])).T
-            points[1] = end_point + (R @ np.array([-2 * self.let_array.b, self.let_array.h])).T
-            points[2] = end_point + (R @ np.array([-2 * self.let_array.b, -self.let_array.h])).T
-            points[3] = end_point + (R @ np.array([0, -self.let_array.h])).T
-            points[4] = end_point + (R @ np.array([0, self.let_array.h])).T
+            points[0] = end_point + (R @ np.array([-self.let_array.gap / 2, self.let_array.h])).T
+            points[1] = end_point + (R @ np.array([-2 * self.let_array.b - self.let_array.gap / 2, self.let_array.h])).T
+            points[2] = end_point + (R @ np.array([-2 * self.let_array.b - self.let_array.gap / 2, -self.let_array.h])).T
+            points[3] = end_point + (R @ np.array([-self.let_array.gap / 2, -self.let_array.h])).T
+            points[4] = end_point + (R @ np.array([-self.let_array.gap / 2, self.let_array.h])).T
             self.axes.plot(scale * points[:, 0], scale * points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
             self.axes.fill(scale * points[:, 0], scale * points[:, 1], color=self.let_array.cmap(i % 10), alpha=0.5)
         self.axes.plot(scale * self.let_array.transforms[:, 0, 2], scale * self.let_array.transforms[:, 1, 2], color=self.let_array.cmap(0))
