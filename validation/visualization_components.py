@@ -154,6 +154,28 @@ class Section():
 
         return midpoint_segment_1, midpoint_segment_2
 
+    def minorAxis(self):
+
+        """
+        assumes a line connecting the midpoints of the two longest segments forms the minor axis of the section
+        """
+
+        if len(self.points) <= 2:
+            return self.points[0], self.points[1]
+
+        segment_lengths = []
+
+        segment_lengths.append(vectorNorm(self.points[0] - self.points[-1]))
+        for i in range(1, len(self.points)):
+            segment_lengths.append(vectorNorm(self.points[i] - self.points[i - 1]))
+
+        index_1, index_2 = findIndicesOfTwoLargest(segment_lengths)
+
+        midpoint_segment_1 = calculateCentroid([self.points[index_1], self.points[index_1 - 1]])
+        midpoint_segment_2 = calculateCentroid([self.points[index_2], self.points[index_2 - 1]])
+
+        return midpoint_segment_1, midpoint_segment_2
+
     def rotate(self, angle):
 
         for point in self.points:
@@ -266,6 +288,21 @@ def findIndicesOfTwoSmallest(values: list):
         if values[i] < values[index_1]:
             index_2, index_1 = index_1, i
         elif values[i] < values[index_2]:
+            index_2 = i
+
+    return index_1, index_2
+
+def findIndicesOfTwoLargest(values: list):
+
+    if len(values) < 2:
+        raise ValueError("List must contain at least two elements")
+
+    index_1, index_2 = (0, 1) if values[0] > values[1] else (1, 0)
+
+    for i in range(2, len(values)):
+        if values[i] > values[index_1]:
+            index_2, index_1 = index_1, i
+        elif values[i] > values[index_2]:
             index_2 = i
 
     return index_1, index_2

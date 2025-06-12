@@ -1,8 +1,9 @@
 from matplotlib import pyplot as plt
 import simulation.arraymodel as am
-from validation.visualization_components import *
 from validation.deflection_measurements import tests
-from numpy import array, degrees, set_printoptions, arange
+from validation.error_calculation import *
+from validation.visualization_components import *
+from numpy import array, degrees, set_printoptions
 
 set_printoptions(legacy="1.25")
 
@@ -32,19 +33,6 @@ def angularError(model: am.LetArray, data: Joint):
             error.append(abs(findDifferenceOfAngles(model_rotation, data_rotation)))
 
     return error
-
-def rootMeanSquareError(error: list):
-
-    rms_error = 0
-
-    for entry in error:
-        rms_error += entry ** 2
-
-    rms_error = rms_error / len(error)
-
-    rms_error = rms_error ** (1 / 2)
-
-    return rms_error
 
 E = am.msiToPa(9.8)
 G = am.msiToPa(18.4)
