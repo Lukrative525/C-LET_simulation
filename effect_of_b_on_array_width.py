@@ -4,9 +4,9 @@ from simulation.arraymodel import LetArray
 from simulation.visualization import ArrayPlayer
 from scipy.optimize import minimize, fsolve
 
-def deflectionError(parameters, args):
+def deflectionError(params, args):
 
-    [torque] = parameters
+    [torque] = params
 
     let_array: LetArray = args[0]
     target_deflection = args[1]
@@ -28,33 +28,31 @@ def findTorqueRequiredForDeflection(target_deflection, initial_guess, let_array:
 
     return required_torque
 
-def stressError(let_array: LetArray, target_deflection):
+def stressError(params, let_array: LetArray):
+
+    [torque] = params
 
     let_array.verbose = False
 
-    required_torque = findTorqueRequiredForDeflection(target_deflection, 0, let_array)
-
-    let_array.calculateStaticsForward(0, 0, -required_torque)
+    let_array.calculateStaticsForward(0, 0, -torque)
     max_bending = let_array.sigmaZZ(let_array.b, 0, 0)
     max_torsion = let_array.sigmaZY(let_array.b, 0, 0)
     max_von_mises = let_array.vonMisesStress3D(0, 0, max_bending, 0, 0, max_torsion)
 
-    error = let_array.Sy - max_von_mises
+    error = (let_array.Sy - max_von_mises) ** 2
 
     let_array.verbose = True
 
     return error
 
-def findNumberTorsionSegmentsRequiredForDeflection(target_deflection, initial_guess, parameters: list):
+def findMaxTorqueAndDeflectionForTorsionSegment(b, h, L, E, G, Sy, gap):
 
-    [b, h, L, E, G, Sy, gap] = parameters
+    test_array = LetArray(b, h, L, E, G, Sy, 1, gap)
+    result = minimize(stressError, 0, test_array)
+    max_torque = abs(result.x[0])
+    max_deflection = test_array.getEndRotation()
 
-    for series in range(initial_guess, initial_guess + 100):
-        let_array = LetArray(b, h, L, E, G, Sy, series, gap)
-        if stressError(let_array, target_deflection) > 0:
-            break
-
-    return series
+    return [max_torque, max_deflection]
 
 def calculateAForSquare(terms=10):
 
@@ -76,26 +74,6 @@ def calculatek1ForSquare(terms=10):
 
     return k1
 
-def testSideLengthAndSeriesNumber(variables, args):
-
-    side_length, series = variables
-    torque, target_deflection, L, G, Sy, k1, A = args
-
-    test = np.zeros(2)
-
-    test[0] = side_length ** 4 - (series * torque * L) / (G * k1 * target_deflection)
-    test[1] = Sy / np.sqrt(3) - (target_deflection * side_length * G * (1 - (8 * A / np.pi ** 2)) / (series * L))
-
-    return test
-
-def findSideLengthAndSeriesNumber(torque, target_deflection, initial_guess: list, parameters: list):
-
-    L, G, Sy, k1, A = parameters
-
-    side_length, series = fsolve(testSideLengthAndSeriesNumber, initial_guess, [torque, target_deflection, L, G, Sy, k1, A], xtol=1e-9)
-
-    return [side_length, series]
-
 if __name__ == "__main__":
 
     A = calculateAForSquare(10)
@@ -107,23 +85,26 @@ if __name__ == "__main__":
     Sy = 350e6
 
     L = 40e-3
-    torsion_bar_width = 10e-3
-    torsion_bar_thickness = 0.2e-3
-    h = torsion_bar_width / 2
-    b = torsion_bar_thickness / 2
+    torsion_segment_width = 10e-3
+    torsion_segment_thickness = 0.2e-3
+    h = torsion_segment_width / 2
+    b = torsion_segment_thickness / 2
 
     target_deflection = np.pi
 
-    series_C_LET = 5
-    series_C_LET = findNumberTorsionSegmentsRequiredForDeflection(target_deflection, series_C_LET, [b, h, L, E, G, Sy, 0])
+    max_torque, max_deflection = findMaxTorqueAndDeflectionForTorsionSegment(b, h, L, E, G, Sy, 0)
+    C_LET_series_number = int(np.ceil(target_deflection / max_deflection))
+    C_LET_array = LetArray(b, h, L, E, G, Sy, C_LET_series_number, 0)
 
-    array_C_LET = LetArray(b, h, L, E, G, Sy, series_C_LET)
-    torque = findTorqueRequiredForDeflection(target_deflection, 0, array_C_LET)
-    print(np.round(torque, 12))
-    player_C_LET = ArrayPlayer(array_C_LET)
+    C_LET_torque = findTorqueRequiredForDeflection(np.pi, max_torque, C_LET_array)
+    print(np.round(C_LET_torque, 12))
+    C_LET_player = ArrayPlayer(C_LET_array, moment_res=1e-12)
 
-    side_length = np.cbrt(torque * (1 - 8 * A / np.pi ** 2) / (k1 * (Sy / np.sqrt(3))))
-    series_LET = side_length ** 4 * G * k1 * target_deflection / (torque * L)
+    side_length = np.cbrt(C_LET_torque * (1 - 8 * A / np.pi ** 2) / (k1 * (Sy / np.sqrt(3))))
+    LET_series_number = int(np.ceil(side_length ** 4 * G * k1 * target_deflection / (C_LET_torque * L)))
+    gap = side_length * (np.sqrt(2) * np.cos(np.pi / 4 - (target_deflection / LET_series_number)) - 1)
+    LET_array = LetArray(side_length / 2, side_length / 2, L, E, G, Sy, LET_series_number, gap)
 
-    array_LET = LetArray(side_length / 2, side_length / 2, L, E, G, Sy, int(np.ceil(series_LET)), side_length * (np.sqrt(2) - 1))
-    player_LET = ArrayPlayer(array_LET)
+    LET_torque = findTorqueRequiredForDeflection(np.pi, max_torque, LET_array)
+    print(np.round(LET_torque, 12))
+    LET_player = ArrayPlayer(LET_array, moment_res=1e-12)
