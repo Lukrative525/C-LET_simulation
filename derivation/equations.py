@@ -118,7 +118,6 @@ for i in range(len(equations)):
 
 solution = sp.solve(equations, [Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, theta, delta])
 
-for expression in solution[1]:
+for expression in solution[0]:
     print(expression)
-
 # %%

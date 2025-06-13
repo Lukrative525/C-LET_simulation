@@ -41,6 +41,8 @@ class LetArray():
 
     def __init__(self, b, h, L, E, G, Sy, series, gap=0):
 
+        self.verbose = True
+
         self.b = b
         self.h = h
         self.L = L
@@ -96,7 +98,7 @@ class LetArray():
         for i in indices:
             self.extensions[i] = extension
 
-    def calculateTorsionSpringConstant(self, n=10):
+    def calculateTorsionSpringConstant(self, terms=10):
 
         if self.h < self.b:
             long_side, short_side = self.b, self.h
@@ -105,7 +107,7 @@ class LetArray():
 
         left_factor = (192 / np.pi ** 5) * (short_side / long_side)
         right_factor = 0
-        for n in range(1, 2 * n + 1, 2):
+        for n in range(1, 2 * terms + 1, 2):
             summand = np.nan_to_num((1 / n ** 5) * np.tanh(n * np.pi * long_side / (2 * short_side)))
             right_factor += summand * np.logical_not(np.isinf(summand))
 
@@ -188,7 +190,7 @@ class LetArray():
                         warnings.simplefilter(warning_behavior)
                         Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta = fsolve(interferenceStatics, initial_guess, xtol=1e-9)
                         error = interferenceStatics([Fx, Fy, T, Fsx, Fsy, Ms, Px, Py, delta, theta])
-                        if np.any(np.abs(error) > 1e-9):
+                        if np.any(np.abs(error) > 1e-9) and self.verbose:
                             print(f"Error values: {error}")
 
                 if delta <= 0:
@@ -211,7 +213,7 @@ class LetArray():
 
         self.calculateTransforms()
 
-    def sigmaZX(self, x, y, index, n=10):
+    def sigmaZX(self, x, y, index, terms=10):
 
         gamma = self.gammas[index]
         left_factor = -16 * self.G * gamma * self.b / (self.L * np.pi ** 2)
@@ -219,15 +221,17 @@ class LetArray():
             right_factor = np.zeros(x.shape)
         else:
             right_factor = 0
-        for i in range(1, 2 * n + 1, 2):
-            summand = np.nan_to_num((-1) ** ((i - 1) / 2) * np.cos(i * np.pi * x / (2 * self.b)) * np.sinh(i * np.pi * y / (2 * self.b)) / (i ** 2 * np.cosh(i * np.pi * self.h / (2 * self.b))))
+        for n in range(1, 2 * terms + 1, 2):
+            with warnings.catch_warnings(record=True) as caught_warnings:
+                warnings.simplefilter(warning_behavior)
+                summand = np.nan_to_num((-1) ** ((n - 1) / 2) * np.cos(n * np.pi * x / (2 * self.b)) * np.sinh(n * np.pi * y / (2 * self.b)) / (n ** 2 * np.cosh(n * np.pi * self.h / (2 * self.b))))
             right_factor += summand * np.logical_not(np.isinf(summand))
 
         sigma_zx = left_factor * right_factor
 
         return sigma_zx
 
-    def sigmaZY(self, x, y, index, n=10):
+    def sigmaZY(self, x, y, index, terms=10):
 
         gamma = self.gammas[index]
         left_factor = -16 * self.G * gamma * self.b / (self.L * np.pi ** 2)
@@ -235,8 +239,10 @@ class LetArray():
             right_factor = np.zeros(x.shape)
         else:
             right_factor = 0
-        for i in range(1, 2 * n + 1, 2):
-            summand = np.nan_to_num((-1) ** ((i - 1) / 2) * np.sin(i * np.pi * x / (2 * self.b)) * np.cosh(i * np.pi * y / (2 * self.b)) / (i ** 2 * np.cosh(i * np.pi * self.h / (2 * self.b))))
+        for n in range(1, 2 * terms + 1, 2):
+            with warnings.catch_warnings(record=True) as caught_warnings:
+                warnings.simplefilter(warning_behavior)
+                summand = np.nan_to_num((-1) ** ((n - 1) / 2) * np.sin(n * np.pi * x / (2 * self.b)) * np.cosh(n * np.pi * y / (2 * self.b)) / (n ** 2 * np.cosh(n * np.pi * self.h / (2 * self.b))))
             right_factor += summand * np.logical_not(np.isinf(summand))
 
         sigma_zy = (2 * self.G * gamma * x / self.L) + (left_factor * right_factor)
@@ -368,7 +374,7 @@ class LetArray():
             warnings.simplefilter(warning_behavior)
             M = fsolve(calculateError, initial_guess, xtol=1e-9)[0]
             error = calculateError([M])
-            if abs(error) > 1e-9:
+            if abs(error) > 1e-9 and self.verbose:
                 print(f"M error: {error}")
 
         self.calculateStaticsForward(-Fx, -Fy, M)
