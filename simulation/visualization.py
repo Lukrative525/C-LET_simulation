@@ -82,8 +82,8 @@ class ArrayDeflectionVisualizer(QVBoxLayout):
         F_length = (self.let_array.b + self.let_array.h) / 2
         self.axes.clear()
 
-        major_ticks = np.arange(-40, 41, 5)
-        minor_ticks = np.arange(-40, 41, 1)
+        major_ticks = np.arange(-60, 61, 5)
+        minor_ticks = np.arange(-60, 61, 1)
         self.axes.tick_params(axis="both", which="major", labelsize=18)
         self.axes.set_xticks(major_ticks)
         self.axes.set_xticks(minor_ticks, minor=True)

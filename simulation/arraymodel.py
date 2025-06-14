@@ -386,8 +386,8 @@ class LetArray():
         F_length = (self.b + self.h) / 2
         axes.clear()
 
-        major_ticks = np.arange(-40, 41, 5)
-        minor_ticks = np.arange(-40, 41, 1)
+        major_ticks = np.arange(-60, 61, 5)
+        minor_ticks = np.arange(-60, 61, 1)
         axes.tick_params(axis="both", which="major", labelsize=18)
         axes.set_xticks(major_ticks)
         axes.set_xticks(minor_ticks, minor=True)

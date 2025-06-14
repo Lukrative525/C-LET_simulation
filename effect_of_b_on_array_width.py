@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     L = 40e-3
     torsion_segment_width = 10e-3
-    torsion_segment_thickness = 0.2e-3
+    torsion_segment_thickness = 0.5e-3
     h = torsion_segment_width / 2
     b = torsion_segment_thickness / 2
 
@@ -107,4 +107,5 @@ if __name__ == "__main__":
 
     LET_torque = findTorqueRequiredForDeflection(np.pi, max_torque, LET_array)
     print(np.round(LET_torque, 12))
+    print(side_length / 2)
     LET_player = ArrayPlayer(LET_array, moment_res=1e-12)
