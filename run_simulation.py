@@ -1,7 +1,7 @@
 from simulation.arraymodel import LetArray, msiToPa
 from simulation.visualization import ArrayPlayer
 
-if __name__ == "__main__":
+def main():
 
     E = msiToPa(9.8)
     G = msiToPa(18.4)
@@ -20,3 +20,7 @@ if __name__ == "__main__":
     array = LetArray(b, h, L, E, G, Sy, num_series)
 
     player = ArrayPlayer(array)
+
+if __name__ == "__main__":
+
+    main()
