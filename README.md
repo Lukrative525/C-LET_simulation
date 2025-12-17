@@ -10,7 +10,7 @@ Torsion Bar Visualization
 
 ## How to Run
 
-Download the project zip file and extract it. Navigate to the folder containing the extracted files and set it as your working directory. Then run `simulation.py`.
+Download the project zip file and extract it. Navigate to the folder containing the extracted files and set it as your working directory. Then execute `run_simulation.py`. Last tested using Python version 3.11.9.
 
 ### Dependencies
 
